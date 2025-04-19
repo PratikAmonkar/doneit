@@ -20,8 +20,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    systemUiConfig();
-
+    systemUiConfig(
+      statusBarColor: AppColors.lightBackground,
+      navigationColor: AppColors.lightBackground,
+    );
     _timer = Timer(const Duration(seconds: 3), () {
       GoRouter.of(context).pushReplacement("/main-screen");
     });
@@ -37,7 +39,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        backgroundColor: AppColors.backgroundColor,
+        backgroundColor: AppColors.lightBackground,
         body: Padding(
           padding: const EdgeInsets.symmetric(vertical: 16.0),
           child: Center(
