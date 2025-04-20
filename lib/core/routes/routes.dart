@@ -1,3 +1,4 @@
+import 'package:DoneIt/presentation/screens/add_edit_screen.dart';
 import 'package:DoneIt/presentation/screens/main_screen.dart';
 import 'package:go_router/go_router.dart';
 
@@ -11,13 +12,12 @@ final router = GoRouter(
       path: "/main-screen",
       builder: (context, state) => const MainScreen(),
     ),
-
-    /*GoRoute(
-      path: "/category-detail/:type",
+    GoRoute(
+      path: "/add-edit-screen/:type",
       builder: (context, state) {
-        final productType = state.pathParameters['type'];
-        return CategoryDetailScreen(type: productType);
+        final type = state.pathParameters['type'];
+        return AddEditScreen(type: type ?? "1");
       },
-    ),*/
+    ),
   ],
 );
