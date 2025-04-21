@@ -31,14 +31,14 @@ class _MainScreenState extends State<MainScreen> {
     _scrollController.addListener(() {
       final direction = _scrollController.position.userScrollDirection;
       if (direction == ScrollDirection.reverse) {
-        if (_showFab || _showAppBar) {
+        if (_showFab) {
           setState(() {
             _showFab = false;
             _showAppBar = false;
           });
         }
       } else if (direction == ScrollDirection.forward) {
-        if (!_showFab || !_showAppBar) {
+        if (!_showFab) {
           setState(() {
             _showFab = true;
             _showAppBar = true;
@@ -65,7 +65,7 @@ class _MainScreenState extends State<MainScreen> {
         backgroundColor: AppColors.lightBackground,
         floatingActionButton: AnimatedSlide(
           offset: _showFab ? Offset.zero : const Offset(0, 2),
-          duration: const Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 1000),
           child: AnimatedOpacity(
             opacity: _showFab ? 1.0 : 0.0,
             duration: const Duration(milliseconds: 300),
@@ -89,37 +89,30 @@ class _MainScreenState extends State<MainScreen> {
         body: SafeArea(
           child: Column(
             children: [
-              /// 🔥 Custom AppBar with animation
-              AnimatedSlide(
-                offset: _showAppBar ? Offset.zero : const Offset(0, -1),
-                duration: const Duration(milliseconds: 300),
+              AnimatedContainer(
+                height: _showAppBar ? 56.0 : 0.0,
+                duration: Duration(milliseconds: 500),
                 child: AnimatedOpacity(
                   opacity: _showAppBar ? 1.0 : 0.0,
                   duration: const Duration(milliseconds: 300),
-                  child: Container(
-                    color: AppColors.lightBackground,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0,
-                      vertical: 12.0,
-                    ),
-                    child: Column(
+                  child: AppBar(
+                    backgroundColor: AppColors.lightBackground,
+                    surfaceTintColor: AppColors.lightBackground,
+                    title: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        textBold(title: "Hey Buddy!", fontSize: 20.0),
-                        textMedium(title: "Good Morning", fontSize: 14.0),
+                        textBold(title: "Hey Buddy!", fontSize: 22.0),
+                        textBold(title: "Good morning", fontSize: 14.0),
                       ],
                     ),
                   ),
                 ),
               ),
-
-              /// 🔥 Scrollable content
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: ListView(
                     controller: _scrollController,
-                    padding: const EdgeInsets.only(bottom: 80),
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
