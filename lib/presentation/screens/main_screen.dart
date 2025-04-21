@@ -87,7 +87,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
               child: FloatingActionButton(
                 backgroundColor: AppColors.lightPurple200,
                 onPressed: () {
-                  GoRouter.of(context).push("/add-edit-screen/1");
+                  GoRouter.of(context).push("/add-edit-screen/0");
                 },
                 child: const Icon(
                   Icons.add,
@@ -259,7 +259,7 @@ class _MainScreenSuccessStateState
                                 onTap: () {
                                   GoRouter.of(
                                     context,
-                                  ).push("/add-edit-screen/2");
+                                  ).push("/add-edit-screen/1543541");
                                 },
                                 child: Container(
                                   margin: const EdgeInsets.only(bottom: 20.0),
@@ -298,7 +298,7 @@ class _MainScreenSuccessStateState
                                                   BorderRadius.circular(10.0),
                                             ),
                                             child: textBold(
-                                              title: taskBean.priority,
+                                              title: taskBean.priority ?? "Low",
                                               fontSize: 10.0,
                                               fontColor:
                                                   AppColors.lightBackground,

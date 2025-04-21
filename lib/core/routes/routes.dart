@@ -13,10 +13,10 @@ final router = GoRouter(
       builder: (context, state) => const MainScreen(),
     ),
     GoRoute(
-      path: "/add-edit-screen/:type",
+      path: "/add-edit-screen/:id",
       builder: (context, state) {
-        final type = state.pathParameters['type'];
-        return AddEditScreen(type: type ?? "1");
+        var id = state.pathParameters['id'];
+        return AddEditScreen(id: id == "0" ? null : id);
       },
     ),
   ],

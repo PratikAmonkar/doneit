@@ -51,6 +51,25 @@ class MainScreenNotifier extends StateNotifier<MainScreenProvider> {
       );
     }
   }
+
+  void addTodoToList() async {
+    /*  List<CartItemBean> updatedProductList = [];
+    if (state.respProductList.isSuccess) {
+      updatedProductList =
+      List<CartItemBean>.from(state.respProductList.data.cartItemBean);
+    }
+
+    if (product.productId.toString() == productId) {
+      updatedProductList.removeWhere(
+            (product) => product.productId.toString() == productId,
+      );
+    }
+    updatedProductList.add(product);
+    CartBean updatedCart = CartBean(
+      address: state.respProductList.data?.address,
+      cartItemBean: updatedProductList,
+    );*/
+  }
 }
 
 final mainScreenProvider =

@@ -1,7 +1,7 @@
 class TaskBean {
   final String id;
   final String title;
-  final String priority;
+  final String? priority;
   final String created;
   final String? updated;
   final int? todosCount;
@@ -9,7 +9,7 @@ class TaskBean {
   TaskBean({
     required this.id,
     required this.title,
-    required this.priority,
+    this.priority = "Low",
     required this.created,
     this.updated,
     this.todosCount,
@@ -37,7 +37,7 @@ class TaskBean {
     return TaskBean(
       id: json['id'] as String,
       title: json['title'] as String,
-      priority: json['priority'] as String,
+      priority: json['priority'] as String?,
       created: json['created'] as String,
       updated: json['updated'] as String?,
       todosCount: json['completedTodosCount'] ?? 0,
