@@ -1,4 +1,5 @@
 import 'package:DoneIt/core/Repository/database_repo_impl.dart';
+import 'package:DoneIt/domain/task_bean.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -28,8 +29,18 @@ class MainScreenNotifier extends StateNotifier<MainScreenProvider> {
     state = state.copyWith(respTaskList: ResponseStatus.onLoading());
     var response = await DatabaseRepository.getAllTasks();
     if (response.isSuccess) {
-      debugPrint("Success data = ${response.data}");
-      state = state.copyWith(respTaskList: ResponseStatus.onSuccess("data"));
+      debugPrint("Success = ${response.data}");
+      // var successState = TaskBean.fromJson(response.data);
+      var successState =
+          (response.data as List).map((productJson) {
+            return TaskBean.fromJson(productJson);
+          }).toList();
+
+      debugPrint("Success data = $successState");
+
+      state = state.copyWith(
+        respTaskList: ResponseStatus.onSuccess(successState),
+      );
       /*  var successState = ProductList.fromMap(response.data["data"]);
       state = state.copyWith(
         respTaskList: ResponseStatus.onSuccess(successState),

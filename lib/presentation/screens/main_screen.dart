@@ -1,4 +1,6 @@
 import 'package:DoneIt/core/provider/main_screen_provider.dart';
+import 'package:DoneIt/domain/task_bean.dart';
+import 'package:DoneIt/presentation/components/Spacer/spacer.dart';
 import 'package:DoneIt/presentation/components/Text/text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -101,140 +103,14 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           child: Stack(
             children: [
               if (mainProvider.respTaskList.isSuccess) ...[
-                Column(
-                  children: [
-                    AnimatedContainer(
-                      height: _showAppBar ? 56.0 : 0.0,
-                      duration: Duration(milliseconds: 500),
-                      child: AnimatedOpacity(
-                        opacity: _showAppBar ? 1.0 : 0.0,
-                        duration: const Duration(milliseconds: 300),
-                        child: AppBar(
-                          backgroundColor: AppColors.lightBackground,
-                          surfaceTintColor: AppColors.lightBackground,
-                          title: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              textBold(title: "Hey Buddy!", fontSize: 22.0),
-                              textBold(title: "Good morning", fontSize: 14.0),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: ListView(
-                          controller: _scrollController,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  children: [
-                                    textBold(
-                                      title: "Sort by : All",
-                                      fontSize: 14.0,
-                                    ),
-                                    PopupMenuButton(
-                                      icon: const Icon(
-                                        Icons.more_vert,
-                                        size: 20.0,
-                                      ),
-                                      onSelected: (value) {},
-                                      itemBuilder:
-                                          (BuildContext context) => [
-                                            PopupMenuItem(
-                                              value: 'option1',
-                                              child: textBold(
-                                                title: 'Option 1',
-                                                fontSize: 12.0,
-                                              ),
-                                            ),
-                                          ],
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  children: [
-                                    textBold(
-                                      title: "Priority by : All",
-                                      fontSize: 14.0,
-                                    ),
-                                    PopupMenuButton(
-                                      icon: const Icon(
-                                        Icons.more_vert,
-                                        size: 20.0,
-                                      ),
-                                      onSelected: (value) {},
-                                      itemBuilder:
-                                          (BuildContext context) => [
-                                            PopupMenuItem(
-                                              value: 'option1',
-                                              child: textBold(
-                                                title: 'Option 1',
-                                                fontSize: 12.0,
-                                              ),
-                                            ),
-                                          ],
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            ListView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: 10,
-                              itemBuilder: (BuildContext context, int index) {
-                                return GestureDetector(
-                                  onTap: () {
-                                    GoRouter.of(
-                                      context,
-                                    ).push("/add-edit-screen/2");
-                                  },
-                                  child: Container(
-                                    margin: const EdgeInsets.only(bottom: 20.0),
-                                    padding: const EdgeInsets.all(16.0),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10.0),
-                                      color: AppColors.lightPurple100,
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        textBold(
-                                          title: "First task title",
-                                          fontSize: 18.0,
-                                        ),
-                                        textBold(
-                                          title: "First task description",
-                                          fontSize: 14.0,
-                                          fontColor: AppColors.lightGrey100,
-                                        ),
-                                        textBold(title: "Low", fontSize: 10.0),
-                                        textBold(
-                                          title: "Completed",
-                                          fontSize: 10.0,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
+                MainScreenSuccessState(
+                  mainScreenProvider: mainProvider,
+                  scrollController: _scrollController,
+                  showAppBar: _showAppBar,
                 ),
               ],
               if (mainProvider.respTaskList.isLoading) ...[
-                CircularProgressIndicator(),
+                Center(child: CircularProgressIndicator()),
               ],
 
               if (mainProvider.respTaskList.isError) ...[
@@ -244,6 +120,204 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class MainScreenSuccessState extends ConsumerStatefulWidget {
+  final MainScreenProvider mainScreenProvider;
+  final bool showAppBar;
+  final ScrollController scrollController;
+
+  const MainScreenSuccessState({
+    super.key,
+    required this.mainScreenProvider,
+    required this.showAppBar,
+    required this.scrollController,
+  });
+
+  @override
+  ConsumerState<MainScreenSuccessState> createState() =>
+      _MainScreenSuccessStateState();
+}
+
+class _MainScreenSuccessStateState
+    extends ConsumerState<MainScreenSuccessState> {
+  @override
+  Widget build(BuildContext context) {
+    final List<TaskBean> taskList =
+        widget.mainScreenProvider.respTaskList.data ?? List.empty();
+    return Column(
+      children: [
+        AnimatedContainer(
+          height: widget.showAppBar ? 56.0 : 0.0,
+          duration: Duration(milliseconds: 500),
+          child: AnimatedOpacity(
+            opacity: widget.showAppBar ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 300),
+            child: AppBar(
+              backgroundColor: AppColors.lightBackground,
+              surfaceTintColor: AppColors.lightBackground,
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  textBold(title: "Hey Buddy!", fontSize: 22.0),
+                  textBold(title: "Good morning", fontSize: 14.0),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child:
+                taskList.isEmpty
+                    ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset(
+                          "assets/empty_data.png",
+                          width: 100.0,
+                          height: 100.0,
+                        ),
+                        verticalSpacer(),
+                        textBold(title: "No task available", fontSize: 14.0),
+                      ],
+                    )
+                    : SingleChildScrollView(
+                      controller: widget.scrollController,
+                      child: Column(
+                        children: [
+                          /*
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  textBold(
+                                    title: "Sort by : All",
+                                    fontSize: 14.0,
+                                  ),
+                                  PopupMenuButton(
+                                    icon: const Icon(
+                                      Icons.more_vert,
+                                      size: 20.0,
+                                    ),
+                                    onSelected: (value) {},
+                                    itemBuilder:
+                                        (BuildContext context) => [
+                                          PopupMenuItem(
+                                            value: 'option1',
+                                            child: textBold(
+                                              title: 'Option 1',
+                                              fontSize: 12.0,
+                                            ),
+                                          ),
+                                        ],
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  textBold(
+                                    title: "Priority by : All",
+                                    fontSize: 14.0,
+                                  ),
+                                  PopupMenuButton(
+                                    icon: const Icon(
+                                      Icons.more_vert,
+                                      size: 20.0,
+                                    ),
+                                    onSelected: (value) {},
+                                    itemBuilder:
+                                        (BuildContext context) => [
+                                          PopupMenuItem(
+                                            value: 'option1',
+                                            child: textBold(
+                                              title: 'Option 1',
+                                              fontSize: 12.0,
+                                            ),
+                                          ),
+                                        ],
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+*/
+                          verticalSpacer(value: 10.0),
+                          ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: taskList.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              final TaskBean taskBean = taskList[index];
+
+                              return GestureDetector(
+                                onTap: () {
+                                  GoRouter.of(
+                                    context,
+                                  ).push("/add-edit-screen/2");
+                                },
+                                child: Container(
+                                  margin: const EdgeInsets.only(bottom: 20.0),
+                                  padding: const EdgeInsets.all(16.0),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                    color: AppColors.lightPurple100,
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      textBold(
+                                        title: taskBean.title,
+                                        fontSize: 18.0,
+                                      ),
+                                      Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          textBold(
+                                            title:
+                                                "Completed ${taskBean.todosCount} out of ${taskList.length}",
+                                            fontSize: 10.0,
+                                          ),
+                                          Container(
+                                            padding: EdgeInsets.symmetric(
+                                              vertical: 5.0,
+                                              horizontal: 10.0,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: AppColors.lightRed100,
+                                              borderRadius:
+                                                  BorderRadius.circular(10.0),
+                                            ),
+                                            child: textBold(
+                                              title: taskBean.priority,
+                                              fontSize: 10.0,
+                                              fontColor:
+                                                  AppColors.lightBackground,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+          ),
+        ),
+      ],
     );
   }
 }

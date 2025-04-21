@@ -85,9 +85,10 @@ class DatabaseConfig {
       CREATE TABLE IF NOT EXISTS todos (
         id TEXT PRIMARY KEY,
         task_id TEXT,
-        description TEXT,
         is_done INTEGER,
-        FOREIGN KEY(task_id) REFERENCES tasks(id) ON DELETE CASCADE
+        FOREIGN KEY(task_id) REFERENCES tasks(id) ON DELETE CASCADE,
+        created TEXT,
+        updated TEXT
       );
     """);
   }

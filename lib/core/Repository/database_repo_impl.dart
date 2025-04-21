@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../domain/response_status.dart';
@@ -130,8 +129,16 @@ class DatabaseRepository {
   static Future<ResponseStatus> getAllTasks() async {
     try {
       final db = await DatabaseConfig.initializeDb();
-      final result = await db.query('tasks');
-      debugPrint("Result data = $result");
+
+      final result = await db.rawQuery('''
+      SELECT 
+        tasks.*, 
+        COUNT(todos.id) AS completedTodosCount
+      FROM tasks
+      LEFT JOIN todos ON tasks.id = todos.task_id AND todos.is_done = 1
+      GROUP BY tasks.id
+      ORDER BY tasks.created DESC;
+    ''');
 
       return ResponseStatus.onSuccess(result);
     } catch (e) {
