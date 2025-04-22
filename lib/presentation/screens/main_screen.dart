@@ -87,7 +87,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
               child: FloatingActionButton(
                 backgroundColor: AppColors.lightPurple200,
                 onPressed: () {
-                  GoRouter.of(context).push("/add-edit-screen/0");
+                  GoRouter.of(context).push("/add-edit-screen/0/a");
                 },
                 child: const Icon(
                   Icons.add,
@@ -257,9 +257,9 @@ class _MainScreenSuccessStateState
 
                               return GestureDetector(
                                 onTap: () {
-                                  GoRouter.of(
-                                    context,
-                                  ).push("/add-edit-screen/1543541");
+                                  GoRouter.of(context).push(
+                                    "/add-edit-screen/${taskBean.id}/${taskBean.title}",
+                                  );
                                 },
                                 child: Container(
                                   margin: const EdgeInsets.only(bottom: 20.0),
@@ -284,7 +284,7 @@ class _MainScreenSuccessStateState
                                         children: [
                                           textBold(
                                             title:
-                                                "Completed ${taskBean.todosCount} out of ${taskList.length}",
+                                                "Completed ${taskBean.todosDoneCount} out of ${taskBean.totalTodosCount}",
                                             fontSize: 10.0,
                                           ),
                                           Container(

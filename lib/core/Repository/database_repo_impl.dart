@@ -1,4 +1,5 @@
 import 'package:DoneIt/domain/task_bean.dart';
+import 'package:DoneIt/domain/todo_bean.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../domain/response_status.dart';
@@ -11,15 +12,25 @@ class DatabaseRepository {
     try {
       final db = await DatabaseConfig.initializeDb();
 
-      final result = await db.rawQuery('''
-      SELECT 
-        tasks.*, 
+      /*      final result = await db.rawQuery('''
+      SELECT
+        tasks.*,
         COUNT(todos.id) AS completedTodosCount
       FROM tasks
       LEFT JOIN todos ON tasks.id = todos.task_id AND todos.is_done = 1
       GROUP BY tasks.id
       ORDER BY tasks.created DESC;
-    ''');
+    ''');*/
+      final result = await db.rawQuery('''
+          SELECT 
+            tasks.*,
+            COUNT(CASE WHEN todos.is_done = 1 THEN 1 END) AS completedTodosCount,
+            COUNT(todos.id) AS totalTodosCount
+          FROM tasks
+          LEFT JOIN todos ON tasks.id = todos.task_id
+          GROUP BY tasks.id
+          ORDER BY tasks.created DESC;
+        ''');
 
       return ResponseStatus.onSuccess(result);
     } catch (e) {
@@ -51,7 +62,6 @@ class DatabaseRepository {
   static Future<ResponseStatus> createTask(TaskBean taskBean) async {
     try {
       final db = await DatabaseConfig.initializeDb();
-      final id = _uuid.v4();
 
       await db.insert('tasks', taskBean.toJson());
 
@@ -95,11 +105,24 @@ class DatabaseRepository {
         where: 'task_id = ?',
         whereArgs: [taskId],
       );
-
       return ResponseStatus.onSuccess(result);
     } catch (e) {
       return ResponseStatus.onError(
         ApiErrorDetails(message: 'Failed to fetch todos', statusCode: 500),
+      );
+    }
+  }
+
+  static Future<ResponseStatus> addTodo(TodoBean todoBean) async {
+    try {
+      final db = await DatabaseConfig.initializeDb();
+
+      await db.insert('todos', todoBean.toJson());
+
+      return ResponseStatus.onSuccess(todoBean);
+    } catch (e) {
+      return ResponseStatus.onError(
+        ApiErrorDetails(message: 'Failed to add todo', statusCode: 500),
       );
     }
   }

@@ -4,7 +4,8 @@ class TaskBean {
   final String? priority;
   final String created;
   final String? updated;
-  final int? todosCount;
+  final int? todosDoneCount;
+  final int? totalTodosCount;
 
   TaskBean({
     required this.id,
@@ -12,7 +13,8 @@ class TaskBean {
     this.priority = "Low",
     required this.created,
     this.updated,
-    this.todosCount,
+    this.todosDoneCount,
+    this.totalTodosCount,
   });
 
   TaskBean copyWith({
@@ -21,7 +23,8 @@ class TaskBean {
     String? priority,
     String? created,
     String? updated,
-    int? todosCount,
+    int? todosDoneCount,
+    int? totalTodosCount,
   }) {
     return TaskBean(
       id: id ?? this.id,
@@ -29,7 +32,8 @@ class TaskBean {
       priority: priority ?? this.priority,
       created: created ?? this.created,
       updated: updated ?? this.updated,
-      todosCount: todosCount ?? this.todosCount,
+      todosDoneCount: todosDoneCount ?? this.todosDoneCount,
+      totalTodosCount: totalTodosCount ?? this.totalTodosCount,
     );
   }
 
@@ -40,7 +44,8 @@ class TaskBean {
       priority: json['priority'] as String?,
       created: json['created'] as String,
       updated: json['updated'] as String?,
-      todosCount: json['completedTodosCount'] ?? 0,
+      todosDoneCount: json['completedTodosCount'] ?? 0,
+      totalTodosCount: json['totalTodosCount'] ?? 0,
     );
   }
 

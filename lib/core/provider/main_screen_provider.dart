@@ -30,7 +30,6 @@ class MainScreenNotifier extends StateNotifier<MainScreenProvider> {
     var response = await DatabaseRepository.getAllTasks();
     if (response.isSuccess) {
       debugPrint("Success = ${response.data}");
-      // var successState = TaskBean.fromJson(response.data);
       var successState =
           (response.data as List).map((productJson) {
             return TaskBean.fromJson(productJson);
@@ -41,10 +40,6 @@ class MainScreenNotifier extends StateNotifier<MainScreenProvider> {
       state = state.copyWith(
         respTaskList: ResponseStatus.onSuccess(successState),
       );
-      /*  var successState = ProductList.fromMap(response.data["data"]);
-      state = state.copyWith(
-        respTaskList: ResponseStatus.onSuccess(successState),
-      );*/
     } else {
       state = state.copyWith(
         respTaskList: ResponseStatus.onError(response.error),
@@ -52,23 +47,15 @@ class MainScreenNotifier extends StateNotifier<MainScreenProvider> {
     }
   }
 
-  void addTodoToList() async {
-    /*  List<CartItemBean> updatedProductList = [];
-    if (state.respProductList.isSuccess) {
-      updatedProductList =
-      List<CartItemBean>.from(state.respProductList.data.cartItemBean);
-    }
+  void addTaskToList({required TaskBean task}) {
+    List<TaskBean> updatedProductList = [];
+    updatedProductList = List<TaskBean>.from(state.respTaskList.data);
 
-    if (product.productId.toString() == productId) {
-      updatedProductList.removeWhere(
-            (product) => product.productId.toString() == productId,
-      );
-    }
-    updatedProductList.add(product);
-    CartBean updatedCart = CartBean(
-      address: state.respProductList.data?.address,
-      cartItemBean: updatedProductList,
-    );*/
+    updatedProductList.add(task);
+
+    state = state.copyWith(
+      respTaskList: ResponseStatus.onSuccess(updatedProductList),
+    );
   }
 }
 

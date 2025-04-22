@@ -86,9 +86,10 @@ class DatabaseConfig {
         id TEXT PRIMARY KEY,
         task_id TEXT,
         is_done INTEGER,
-        FOREIGN KEY(task_id) REFERENCES tasks(id) ON DELETE CASCADE,
+        title TEXT,
         created TEXT,
-        updated TEXT
+        updated TEXT,
+        FOREIGN KEY(task_id) REFERENCES tasks(id) ON DELETE CASCADE
       );
     """);
   }
