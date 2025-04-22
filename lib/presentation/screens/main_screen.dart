@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/constants/app_colors.dart';
+import '../../core/util/common_util.dart';
 import '../components/System Ui/system_ui.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
@@ -162,7 +163,7 @@ class _MainScreenSuccessStateState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   textBold(title: "Hey Buddy!", fontSize: 22.0),
-                  textBold(title: "Good morning", fontSize: 14.0),
+                  textBold(title: CommonUtil().greetUser(), fontSize: 14.0),
                 ],
               ),
             ),
@@ -276,7 +277,7 @@ class _MainScreenSuccessStateState
                                         title: taskBean.title,
                                         fontSize: 18.0,
                                       ),
-                                      Row(
+                                      /*      Row(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.center,
                                         mainAxisAlignment:
@@ -305,6 +306,17 @@ class _MainScreenSuccessStateState
                                             ),
                                           ),
                                         ],
+                                      ),*/
+                                      textBold(
+                                        title:
+                                            "Completed ${taskBean.todosDoneCount} out of ${taskBean.totalTodosCount}",
+                                        fontSize: 10.0,
+                                      ),
+                                      textMedium(
+                                        title:
+                                            "${taskBean.updated != null ? "Last updated :" : "created :"} ${taskBean.updated != null ? CommonUtil().getDate(option: 1, value: taskBean.updated ?? "") : CommonUtil().getDate(option: 1, value: taskBean.created)}",
+                                        fontSize: 10.0,
+                                        fontColor: Colors.grey.shade900,
                                       ),
                                     ],
                                   ),

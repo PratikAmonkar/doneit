@@ -48,14 +48,66 @@ class MainScreenNotifier extends StateNotifier<MainScreenProvider> {
   }
 
   void addTaskToList({required TaskBean task}) {
-    List<TaskBean> updatedProductList = [];
-    updatedProductList = List<TaskBean>.from(state.respTaskList.data);
+    List<TaskBean> updatedTaskList = List<TaskBean>.from(
+      state.respTaskList.data,
+    );
 
-    updatedProductList.add(task);
+    updatedTaskList.insert(0, task);
 
     state = state.copyWith(
-      respTaskList: ResponseStatus.onSuccess(updatedProductList),
+      respTaskList: ResponseStatus.onSuccess(updatedTaskList),
     );
+  }
+
+  void updateTodoTotalCount({
+    required String taskId,
+    required int todosCount,
+  }) async {
+    List<TaskBean> currentList = List<TaskBean>.from(state.respTaskList.data);
+    final index = currentList.indexWhere((task) => task.id == taskId);
+    final updatedAt = DateTime.now().toIso8601String();
+    var response = await DatabaseRepository.updateTaskUpdatedAt(
+      taskId,
+      updatedAt,
+    );
+    if (response.isSuccess) {
+      if (index != -1) {
+        final updatedTask = currentList[index].copyWith(
+          totalTodosCount: todosCount,
+          updated: updatedAt,
+        );
+        currentList[index] = updatedTask;
+        state = state.copyWith(
+          respTaskList: ResponseStatus.onSuccess(currentList),
+        );
+      }
+    }
+  }
+
+  void updateTodoDoneCount({
+    required String taskId,
+    required int todoDoneCount,
+  }) async {
+    List<TaskBean> currentList = List<TaskBean>.from(state.respTaskList.data);
+
+    final index = currentList.indexWhere((task) => task.id == taskId);
+    final updatedAt = DateTime.now().toIso8601String();
+    var response = await DatabaseRepository.updateTaskUpdatedAt(
+      taskId,
+      updatedAt,
+    );
+    if (response.isSuccess) {
+      if (index != -1) {
+        final updatedTask = currentList[index].copyWith(
+          todosDoneCount: todoDoneCount,
+          updated: updatedAt,
+        );
+        currentList[index] = updatedTask;
+        state = state.copyWith(
+          respTaskList: ResponseStatus.onSuccess(currentList),
+        );
+      }
+    }
   }
 }
 

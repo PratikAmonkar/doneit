@@ -1,5 +1,6 @@
 import 'package:DoneIt/domain/task_bean.dart';
 import 'package:DoneIt/domain/todo_bean.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../domain/response_status.dart';
@@ -11,16 +12,6 @@ class DatabaseRepository {
   static Future<ResponseStatus> getAllTasks() async {
     try {
       final db = await DatabaseConfig.initializeDb();
-
-      /*      final result = await db.rawQuery('''
-      SELECT
-        tasks.*,
-        COUNT(todos.id) AS completedTodosCount
-      FROM tasks
-      LEFT JOIN todos ON tasks.id = todos.task_id AND todos.is_done = 1
-      GROUP BY tasks.id
-      ORDER BY tasks.created DESC;
-    ''');*/
       final result = await db.rawQuery('''
           SELECT 
             tasks.*,
@@ -73,17 +64,17 @@ class DatabaseRepository {
     }
   }
 
-  static Future<ResponseStatus> deleteTask(String taskId) async {
+  static Future<ResponseStatus> deleteTodo(String todoId) async {
     try {
       final db = await DatabaseConfig.initializeDb();
       final rowsDeleted = await db.delete(
-        'tasks',
+        'todos',
         where: 'id = ?',
-        whereArgs: [taskId],
+        whereArgs: [todoId],
       );
 
       if (rowsDeleted > 0) {
-        return ResponseStatus.onSuccess(taskId);
+        return ResponseStatus.onSuccess(todoId);
       } else {
         return ResponseStatus.onError(
           ApiErrorDetails(message: 'Task not found', statusCode: 404),
@@ -123,6 +114,49 @@ class DatabaseRepository {
     } catch (e) {
       return ResponseStatus.onError(
         ApiErrorDetails(message: 'Failed to add todo', statusCode: 500),
+      );
+    }
+  }
+
+  static Future<ResponseStatus> updateTodoStatus(TodoBean todoBean) async {
+    try {
+      final db = await DatabaseConfig.initializeDb();
+
+      await db.insert(
+        'todos',
+        todoBean.toJson(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+
+      return ResponseStatus.onSuccess(todoBean);
+    } catch (e) {
+      return ResponseStatus.onError(
+        ApiErrorDetails(message: 'Failed to update todo', statusCode: 500),
+      );
+    }
+  }
+
+  static Future<ResponseStatus> updateTaskUpdatedAt(
+    String taskId,
+    String dateTime,
+  ) async {
+    try {
+      final db = await DatabaseConfig.initializeDb();
+
+      await db.update(
+        'tasks',
+        {'updated': dateTime},
+        where: 'id = ?',
+        whereArgs: [taskId],
+      );
+
+      return ResponseStatus.onSuccess(dateTime);
+    } catch (e) {
+      return ResponseStatus.onError(
+        ApiErrorDetails(
+          message: 'Failed to update todo timestamp',
+          statusCode: 500,
+        ),
       );
     }
   }

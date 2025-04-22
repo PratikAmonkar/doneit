@@ -19,7 +19,7 @@ final router = GoRouter(
         var name = state.pathParameters['name'];
         return AddEditScreen(
           id: id == "0" ? null : id,
-          name: name == "0" ? null : name,
+          name: name == "a" ? "" : name ?? "",
         );
       },
     ),
