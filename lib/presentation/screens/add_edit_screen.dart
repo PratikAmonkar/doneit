@@ -54,7 +54,6 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
     final addEditProvider = ref.watch(addEditScreenProvider);
 
     if (addEditProvider.respUpdateTaskTitle.isSuccess) {
-      debugPrint("Test 10");
       WidgetsBinding.instance.addPostFrameCallback((_) {
         showSnackBarMessage(
           context: context,
@@ -73,7 +72,6 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
     }
 
     if (addEditProvider.respUpdateTaskTitle.isError) {
-      debugPrint("Test 11");
       WidgetsBinding.instance.addPostFrameCallback((_) {
         showSnackBarMessage(
           context: context,
@@ -99,8 +97,6 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
 
     if (addEditProvider.respDeleteTodo.isSuccess) {
       final List<TodoBean> newTodoList = addEditProvider.respDeleteTodo.data;
-
-      debugPrint("Todo length = ${newTodoList.length}");
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ref
             .read(mainScreenProvider.notifier)
@@ -199,11 +195,7 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
               .getTodoList(taskId: widget.id ?? "");
         });
       }
-      if (addEditProvider.respTodoList.isError) {
-        debugPrint("Error");
-      }
       if (addEditProvider.respTodoList.isSuccess) {
-        debugPrint("Success");
         setState(() {
           todosList = addEditProvider.respTodoList.data;
         });
@@ -264,7 +256,6 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
                       onSubmitted: (value) {
                         if (widget.id == null) {
                           WidgetsBinding.instance.addPostFrameCallback((_) {
-                            debugPrint("Test 2");
                             ref
                                 .read(addEditScreenProvider.notifier)
                                 .addTask(
@@ -279,7 +270,6 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
                           });
                         } else {
                           WidgetsBinding.instance.addPostFrameCallback((_) {
-                            debugPrint("Test 1");
                             ref
                                 .read(addEditScreenProvider.notifier)
                                 .updateTaskTitle(
@@ -417,7 +407,6 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
                                           horizontalSpacer(value: 20.0),
                                           GestureDetector(
                                             onTap: () {
-                                              debugPrint("OnTap delete");
                                               ref
                                                   .read(
                                                     addEditScreenProvider

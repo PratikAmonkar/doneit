@@ -1,6 +1,5 @@
 import 'package:DoneIt/domain/task_bean.dart';
 import 'package:DoneIt/domain/todo_bean.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
 
@@ -188,8 +187,6 @@ class DatabaseRepository {
     String taskId,
     String title,
   ) async {
-    debugPrint("Test 7");
-
     try {
       final db = await DatabaseConfig.initializeDb();
       await db.update(
@@ -198,12 +195,8 @@ class DatabaseRepository {
         where: 'id = ?',
         whereArgs: [taskId],
       );
-      debugPrint("Test 8");
-
       return ResponseStatus.onSuccess(title);
     } catch (e) {
-      debugPrint("Test 9");
-
       return ResponseStatus.onError(
         ApiErrorDetails(
           message: 'Failed to update task title',

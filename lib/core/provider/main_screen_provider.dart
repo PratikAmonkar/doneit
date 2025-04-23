@@ -45,14 +45,10 @@ class MainScreenNotifier extends StateNotifier<MainScreenProvider> {
     state = state.copyWith(respTaskList: ResponseStatus.onLoading());
     var response = await DatabaseRepository.getAllTasks();
     if (response.isSuccess) {
-      debugPrint("Success = ${response.data}");
       var successState =
           (response.data as List).map((productJson) {
             return TaskBean.fromJson(productJson);
           }).toList();
-
-      debugPrint("Success data = $successState");
-
       state = state.copyWith(
         respTaskList: ResponseStatus.onSuccess(successState),
       );

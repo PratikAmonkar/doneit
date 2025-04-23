@@ -51,7 +51,6 @@ Widget textField({
   TextCapitalization textCapitalization = TextCapitalization.words,
 }) {
   return Container(
-    // color: Colors.red.shade100,
     padding: containerPadding,
     width: containerWidth,
     child: Column(

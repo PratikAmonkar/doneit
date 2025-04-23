@@ -79,12 +79,9 @@ class AddEditScreenNotifier extends StateNotifier<AddEditScreenProvider> {
   }
 
   void getTodoList({required String taskId}) async {
-    debugPrint("Task id = $taskId");
     state = state.copyWith(respTodoList: ResponseStatus.onLoading());
     var response = await DatabaseRepository.getTodosByTaskId(taskId);
     if (response.isSuccess) {
-      debugPrint("todos success = ${response.data}");
-
       var successState =
           (response.data as List).map((productJson) {
             return TodoBean.fromJson(productJson);
@@ -159,10 +156,8 @@ class AddEditScreenNotifier extends StateNotifier<AddEditScreenProvider> {
   }
 
   void deleteTodo({required String todoId}) async {
-    debugPrint("Test 1");
     var response = await DatabaseRepository.deleteTodo(todoId);
     if (response.isSuccess) {
-      debugPrint("Test 2");
       List<TodoBean> currentTodos = [];
       currentTodos = List<TodoBean>.from(state.respTodoList.data);
       currentTodos.removeWhere((value) => value.id == todoId);
@@ -170,9 +165,7 @@ class AddEditScreenNotifier extends StateNotifier<AddEditScreenProvider> {
         respTodoList: ResponseStatus.onSuccess(currentTodos),
         respDeleteTodo: ResponseStatus.onSuccess(currentTodos),
       );
-      debugPrint("Test 3");
     } else {
-      debugPrint("Test 4");
       state = state.copyWith(
         respDeleteTodo: ResponseStatus.onError(response.error),
       );
@@ -180,16 +173,12 @@ class AddEditScreenNotifier extends StateNotifier<AddEditScreenProvider> {
   }
 
   void updateTaskTitle({required String taskId, required String title}) async {
-    debugPrint("Test 3");
     var response = await DatabaseRepository.updateTaskTitle(taskId, title);
     if (response.isSuccess) {
-      debugPrint("Test 4");
       state = state.copyWith(
         respUpdateTaskTitle: ResponseStatus.onSuccess(title),
       );
-      debugPrint("Test 5");
     } else {
-      debugPrint("Test 6");
       state = state.copyWith(
         respUpdateTaskTitle: ResponseStatus.onError(response.error),
       );

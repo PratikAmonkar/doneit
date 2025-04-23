@@ -66,7 +66,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     final mainProvider = ref.watch(mainScreenProvider);
 
     if (mainProvider.respTaskList.isEmpty) {
-      debugPrint("Empty state");
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ref.read(mainScreenProvider.notifier).getTaskList();
       });
@@ -194,29 +193,34 @@ class _MainScreenSuccessStateState
                   textBold(title: CommonUtil().greetUser(), fontSize: 14.0),
                 ],
               ),
-              actions: [
-                GestureDetector(
-                  onTap: () {
-                    if (showCheckBox && deleteTaskList.isNotEmpty) {
-                      ref
-                          .read(mainScreenProvider.notifier)
-                          .deleteTask(taskBean: deleteTaskList);
-                    }
-                    setState(() {
-                      deleteTaskList = [];
-                      showCheckBox = !showCheckBox;
-                    });
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Icon(
-                      Icons.delete_outline_rounded,
-                      color: AppColors.lightRed100,
-                      size: 24.0,
-                    ),
-                  ),
-                ),
-              ],
+              actions:
+                  taskList.isNotEmpty
+                      ? [
+                        GestureDetector(
+                          onTap: () {
+                            if (showCheckBox && deleteTaskList.isNotEmpty) {
+                              ref
+                                  .read(mainScreenProvider.notifier)
+                                  .deleteTask(taskBean: deleteTaskList);
+                            }
+                            setState(() {
+                              deleteTaskList = [];
+                              showCheckBox = !showCheckBox;
+                            });
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16.0,
+                            ),
+                            child: Icon(
+                              Icons.delete_outline_rounded,
+                              color: AppColors.lightRed100,
+                              size: 24.0,
+                            ),
+                          ),
+                        ),
+                      ]
+                      : null,
             ),
           ),
         ),

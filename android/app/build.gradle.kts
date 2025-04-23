@@ -9,7 +9,7 @@ android {
     namespace = "com.pratik.doneit"
     compileSdk = flutter.compileSdkVersion
 //    ndkVersion = flutter.ndkVersion
-    ndkVersion = "27.0.12077973"
+    ndkVersion = "27.0.12077973 "
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -30,12 +30,20 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
-
+    signingConfigs {
+        create("release") {
+            storeFile = file("key/upload-keystore.jks")
+            storePassword = "@alphadoneit"
+            keyAlias = "production"
+            keyPassword = "@alphadoneit"
+        }
+    }
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+//            signingConfig signingConfigs.debug
+            signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = true
+            isShrinkResources = true
         }
     }
 }
