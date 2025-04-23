@@ -12,6 +12,7 @@ class AddEditScreenProvider {
   final ResponseStatus respAddTodo;
   final ResponseStatus respUpdateTodoStatus;
   final ResponseStatus respDeleteTodo;
+  final ResponseStatus respUpdateTaskTitle;
 
   AddEditScreenProvider({
     required this.respTodoList,
@@ -19,6 +20,7 @@ class AddEditScreenProvider {
     required this.respAddTodo,
     required this.respUpdateTodoStatus,
     required this.respDeleteTodo,
+    required this.respUpdateTaskTitle,
   });
 
   static AddEditScreenProvider get initial => AddEditScreenProvider(
@@ -27,6 +29,7 @@ class AddEditScreenProvider {
     respAddTodo: ResponseStatus.onEmpty(),
     respUpdateTodoStatus: ResponseStatus.onEmpty(),
     respDeleteTodo: ResponseStatus.onEmpty(),
+    respUpdateTaskTitle: ResponseStatus.onEmpty(),
   );
 
   AddEditScreenProvider copyWith({
@@ -35,6 +38,7 @@ class AddEditScreenProvider {
     ResponseStatus? respAddTodo,
     ResponseStatus? respUpdateTodoStatus,
     ResponseStatus? respDeleteTodo,
+    ResponseStatus? respUpdateTaskTitle,
   }) {
     return AddEditScreenProvider(
       respTodoList: respTodoList ?? this.respTodoList,
@@ -42,6 +46,7 @@ class AddEditScreenProvider {
       respAddTodo: respAddTodo ?? this.respAddTodo,
       respUpdateTodoStatus: respUpdateTodoStatus ?? this.respUpdateTodoStatus,
       respDeleteTodo: respDeleteTodo ?? this.respDeleteTodo,
+      respUpdateTaskTitle: respUpdateTaskTitle ?? this.respUpdateTaskTitle,
     );
   }
 }
@@ -67,6 +72,10 @@ class AddEditScreenNotifier extends StateNotifier<AddEditScreenProvider> {
 
   void resetDeleteTodoState() {
     state = state.copyWith(respDeleteTodo: ResponseStatus.onEmpty());
+  }
+
+  void resetTaskTitleState() {
+    state = state.copyWith(respUpdateTaskTitle: ResponseStatus.onEmpty());
   }
 
   void getTodoList({required String taskId}) async {
@@ -150,20 +159,39 @@ class AddEditScreenNotifier extends StateNotifier<AddEditScreenProvider> {
   }
 
   void deleteTodo({required String todoId}) async {
-    state = state.copyWith(respDeleteTodo: ResponseStatus.onLoading());
+    debugPrint("Test 1");
     var response = await DatabaseRepository.deleteTodo(todoId);
     if (response.isSuccess) {
+      debugPrint("Test 2");
       List<TodoBean> currentTodos = [];
       currentTodos = List<TodoBean>.from(state.respTodoList.data);
-      final index = currentTodos.indexWhere((value) => value.id == todoId);
-      currentTodos.removeAt(index);
+      currentTodos.removeWhere((value) => value.id == todoId);
       state = state.copyWith(
-        respDeleteTodo: ResponseStatus.onSuccess(currentTodos),
         respTodoList: ResponseStatus.onSuccess(currentTodos),
+        respDeleteTodo: ResponseStatus.onSuccess(currentTodos),
       );
+      debugPrint("Test 3");
     } else {
+      debugPrint("Test 4");
       state = state.copyWith(
         respDeleteTodo: ResponseStatus.onError(response.error),
+      );
+    }
+  }
+
+  void updateTaskTitle({required String taskId, required String title}) async {
+    debugPrint("Test 3");
+    var response = await DatabaseRepository.updateTaskTitle(taskId, title);
+    if (response.isSuccess) {
+      debugPrint("Test 4");
+      state = state.copyWith(
+        respUpdateTaskTitle: ResponseStatus.onSuccess(title),
+      );
+      debugPrint("Test 5");
+    } else {
+      debugPrint("Test 6");
+      state = state.copyWith(
+        respUpdateTaskTitle: ResponseStatus.onError(response.error),
       );
     }
   }

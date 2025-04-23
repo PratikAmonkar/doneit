@@ -1,5 +1,6 @@
 import 'package:DoneIt/domain/task_bean.dart';
 import 'package:DoneIt/domain/todo_bean.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
 
@@ -77,12 +78,12 @@ class DatabaseRepository {
         return ResponseStatus.onSuccess(todoId);
       } else {
         return ResponseStatus.onError(
-          ApiErrorDetails(message: 'Task not found', statusCode: 404),
+          ApiErrorDetails(message: 'Todo not found', statusCode: 404),
         );
       }
     } catch (e) {
       return ResponseStatus.onError(
-        ApiErrorDetails(message: 'Failed to delete task', statusCode: 500),
+        ApiErrorDetails(message: 'Failed to delete todo', statusCode: 500),
       );
     }
   }
@@ -155,6 +156,57 @@ class DatabaseRepository {
       return ResponseStatus.onError(
         ApiErrorDetails(
           message: 'Failed to update todo timestamp',
+          statusCode: 500,
+        ),
+      );
+    }
+  }
+
+  static Future<ResponseStatus> deleteMultipleTasksByIds(
+    List<String> taskIds,
+  ) async {
+    try {
+      final db = await DatabaseConfig.initializeDb();
+
+      final placeholders = List.filled(taskIds.length, '?').join(',');
+
+      await db.delete(
+        'tasks',
+        where: 'id IN ($placeholders)',
+        whereArgs: taskIds,
+      );
+
+      return ResponseStatus.onSuccess('Deleted ${taskIds.length} task(s)');
+    } catch (e) {
+      return ResponseStatus.onError(
+        ApiErrorDetails(message: 'Failed to delete tasks', statusCode: 500),
+      );
+    }
+  }
+
+  static Future<ResponseStatus> updateTaskTitle(
+    String taskId,
+    String title,
+  ) async {
+    debugPrint("Test 7");
+
+    try {
+      final db = await DatabaseConfig.initializeDb();
+      await db.update(
+        'tasks',
+        {'title': title},
+        where: 'id = ?',
+        whereArgs: [taskId],
+      );
+      debugPrint("Test 8");
+
+      return ResponseStatus.onSuccess(title);
+    } catch (e) {
+      debugPrint("Test 9");
+
+      return ResponseStatus.onError(
+        ApiErrorDetails(
+          message: 'Failed to update task title',
           statusCode: 500,
         ),
       );

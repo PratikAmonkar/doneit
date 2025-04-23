@@ -7,14 +7,26 @@ import '../../domain/response_status.dart';
 
 class MainScreenProvider {
   final ResponseStatus respTaskList;
+  final ResponseStatus respDeleteTask;
 
-  MainScreenProvider({required this.respTaskList});
+  MainScreenProvider({
+    required this.respTaskList,
+    required this.respDeleteTask,
+  });
 
-  static MainScreenProvider get initial =>
-      MainScreenProvider(respTaskList: ResponseStatus.onEmpty());
+  static MainScreenProvider get initial => MainScreenProvider(
+    respTaskList: ResponseStatus.onEmpty(),
+    respDeleteTask: ResponseStatus.onEmpty(),
+  );
 
-  MainScreenProvider copyWith({ResponseStatus? respTaskList}) {
-    return MainScreenProvider(respTaskList: respTaskList ?? this.respTaskList);
+  MainScreenProvider copyWith({
+    ResponseStatus? respTaskList,
+    ResponseStatus? respDeleteTask,
+  }) {
+    return MainScreenProvider(
+      respTaskList: respTaskList ?? this.respTaskList,
+      respDeleteTask: respDeleteTask ?? this.respDeleteTask,
+    );
   }
 }
 
@@ -23,6 +35,10 @@ class MainScreenNotifier extends StateNotifier<MainScreenProvider> {
 
   void resetTaskListState() {
     state = state.copyWith(respTaskList: ResponseStatus.onEmpty());
+  }
+
+  void resetDeleteTaskState() {
+    state = state.copyWith(respDeleteTask: ResponseStatus.onEmpty());
   }
 
   void getTaskList() async {
@@ -107,6 +123,45 @@ class MainScreenNotifier extends StateNotifier<MainScreenProvider> {
           respTaskList: ResponseStatus.onSuccess(currentList),
         );
       }
+    }
+  }
+
+  void deleteTask({required List<TaskBean> taskBean}) async {
+    state = state.copyWith(respDeleteTask: ResponseStatus.onLoading());
+    List<String> deletedIds = taskBean.map((task) => task.id).toList();
+    var response = await DatabaseRepository.deleteMultipleTasksByIds(
+      deletedIds,
+    );
+
+    if (response.isSuccess) {
+      List<TaskBean> updatedTaskList = List<TaskBean>.from(
+        state.respTaskList.data,
+      );
+      updatedTaskList.removeWhere((task) => deletedIds.contains(task.id));
+      state = state.copyWith(
+        respTaskList: ResponseStatus.onSuccess(updatedTaskList),
+        respDeleteTask: ResponseStatus.onSuccess(updatedTaskList),
+      );
+    } else {
+      state = state.copyWith(
+        respDeleteTask: ResponseStatus.onError(response.error),
+      );
+    }
+  }
+
+  void updateTaskTitle({required String taskId, required String title}) async {
+    List<TaskBean> currentList = List<TaskBean>.from(state.respTaskList.data);
+
+    final index = currentList.indexWhere((task) => task.id == taskId);
+    if (index != -1) {
+      final updatedTask = currentList[index].copyWith(
+        title: title,
+        updated: DateTime.now().toIso8601String(),
+      );
+      currentList[index] = updatedTask;
+      state = state.copyWith(
+        respTaskList: ResponseStatus.onSuccess(currentList),
+      );
     }
   }
 }

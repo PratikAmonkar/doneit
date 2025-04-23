@@ -44,11 +44,48 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
       statusBarColor: AppColors.lightBackground,
       navigationColor: AppColors.lightBackground,
     );
+    setState(() {
+      taskName = widget.name;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final addEditProvider = ref.watch(addEditScreenProvider);
+
+    if (addEditProvider.respUpdateTaskTitle.isSuccess) {
+      debugPrint("Test 10");
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showSnackBarMessage(
+          context: context,
+          primaryTitle: "Task title change successfully",
+          onCloseAction: () {},
+        );
+        setState(() {
+          editTaskName = false;
+          taskName = taskNameController.text;
+        });
+        ref
+            .read(mainScreenProvider.notifier)
+            .updateTaskTitle(taskId: widget.id ?? "", title: taskName);
+        ref.read(addEditScreenProvider.notifier).resetTaskTitleState();
+      });
+    }
+
+    if (addEditProvider.respUpdateTaskTitle.isError) {
+      debugPrint("Test 11");
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showSnackBarMessage(
+          context: context,
+          primaryTitle: "Failed to update task title",
+          onCloseAction: () {},
+        );
+        setState(() {
+          editTaskName = false;
+        });
+        ref.read(addEditScreenProvider.notifier).resetTaskTitleState();
+      });
+    }
 
     if (addEditProvider.respAddTask.isSuccess) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -61,13 +98,22 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
     }
 
     if (addEditProvider.respDeleteTodo.isSuccess) {
+      final List<TodoBean> newTodoList = addEditProvider.respDeleteTodo.data;
+
+      debugPrint("Todo length = ${newTodoList.length}");
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref
+            .read(mainScreenProvider.notifier)
+            .updateTodoTotalCount(
+              taskId: widget.id ?? "",
+              todosCount: newTodoList.length,
+            );
         ref
             .read(mainScreenProvider.notifier)
             .updateTodoDoneCount(
               taskId: widget.id ?? "",
               todoDoneCount:
-                  todosList
+                  newTodoList
                       .where((value) => value.isDone == true)
                       .toList()
                       .length,
@@ -133,6 +179,7 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
             );
       });
     }
+
     if (addEditProvider.respAddTodo.isError) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         showSnackBarMessage(
@@ -216,26 +263,35 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
                       maxLines: 3,
                       onSubmitted: (value) {
                         if (widget.id == null) {
-                          if (taskNameController.text.isNotEmpty) {
-                            WidgetsBinding.instance.addPostFrameCallback((_) {
-                              ref
-                                  .read(addEditScreenProvider.notifier)
-                                  .addTask(
-                                    task: TaskBean(
-                                      id: Uuid().v4(),
-                                      title: taskNameController.text,
-                                      created: DateTime.now().toIso8601String(),
-                                      todosDoneCount: 0,
-                                      totalTodosCount: 0,
-                                    ),
-                                  );
-                            });
-                          }
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            debugPrint("Test 2");
+                            ref
+                                .read(addEditScreenProvider.notifier)
+                                .addTask(
+                                  task: TaskBean(
+                                    id: Uuid().v4(),
+                                    title: taskNameController.text,
+                                    created: DateTime.now().toIso8601String(),
+                                    todosDoneCount: 0,
+                                    totalTodosCount: 0,
+                                  ),
+                                );
+                          });
+                        } else {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            debugPrint("Test 1");
+                            ref
+                                .read(addEditScreenProvider.notifier)
+                                .updateTaskTitle(
+                                  taskId: widget.id ?? "",
+                                  title: taskNameController.text,
+                                );
+                          });
                         }
                       },
                     ),
                   ] else ...[
-                    textBold(title: widget.name, maxLine: 2, fontSize: 20.0),
+                    textBold(title: taskName, maxLine: 2, fontSize: 20.0),
                   ],
                   verticalSpacer(),
                   if (widget.id != null) ...[
@@ -361,17 +417,13 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
                                           horizontalSpacer(value: 20.0),
                                           GestureDetector(
                                             onTap: () {
-                                              WidgetsBinding.instance
-                                                  .addPostFrameCallback((_) {
-                                                    ref
-                                                        .read(
-                                                          addEditScreenProvider
-                                                              .notifier,
-                                                        )
-                                                        .deleteTodo(
-                                                          todoId: todo.id,
-                                                        );
-                                                  });
+                                              debugPrint("OnTap delete");
+                                              ref
+                                                  .read(
+                                                    addEditScreenProvider
+                                                        .notifier,
+                                                  )
+                                                  .deleteTodo(todoId: todo.id);
                                             },
                                             child: Icon(
                                               Icons.delete_outline_rounded,
@@ -390,7 +442,6 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
                                           ),*/
                                           title:
                                               "${todo.updated != null ? "Last updated :" : "created :"} ${todo.updated != null ? CommonUtil().getDate(option: 1, value: todo.updated ?? "") : CommonUtil().getDate(option: 1, value: todo.created)}",
-
                                           fontSize: 10.0,
                                           fontColor: Colors.grey.shade900,
                                         ),
