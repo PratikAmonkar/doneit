@@ -19,7 +19,6 @@ you organize tasks, each with its own list of to-dos, to improve productivity an
 <img src="./assets/splash_screen_img.png" height="300"  alt="image"/>
 <img src="./assets/main_screen_img1.png" height="300"  alt="image"/>
 <img src="./assets/main_screen_img2.png" height="300"  alt="image"/>
-<img src="./assets/empty_data.png" height="300"  alt="image"/>
 <img src="./assets/edit_screen_img1.png" height="300"  alt="image"/>
 
 ---
