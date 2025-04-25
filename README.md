@@ -1,16 +1,43 @@
-# doneit
+# ✅ DoneIt - Task & To-Do Management App
 
-A new Flutter project.
+**DoneIt** is a clean, simple, and efficient task management app built using **Flutter**. It helps
+you organize tasks, each with its own list of to-dos, to improve productivity and keep you focused.
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## 🚀 Features
 
-A few resources to get you started if this is your first Flutter project:
+- 📋 Create and manage tasks
+- ✅ Add multiple to-dos under each task
+- 🧼 Simple and minimalistic UI
+- 🧠 Built with clean architecture and Flutter best practices
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 📱 Screenshots
+
+![App Screenshot](./assets/splash_screen_img.png)
+![App Screenshot](./assets/main_screen_img1.png)
+![App Screenshot](./assets/main_screen_img2.png)
+![App Screenshot](./assets/empty_data.png)
+![App Screenshot](./assets/edit_screen_img1.png)
+
+---
+
+## 🛠️ Tech Stack
+
+- **Framework**: [Flutter](https://flutter.dev/)
+- **Language**: Dart
+- **State Management**: Riverpod
+- **Navigation**: Flutter Navigator
+- **Local Storage**: SQLite
+
+---
+
+
+## 📜 Changelog
+
+### [1.0.0+1] - 2025-04-24
+- **New Features:**
+  - Users can now **add** multiple to-dos under each task.
+  - Users can now **delete** both tasks and individual to-dos.
