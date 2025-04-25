@@ -16,11 +16,11 @@ you organize tasks, each with its own list of to-dos, to improve productivity an
 
 ## 📱 Screenshots
 
-![App Screenshot](./assets/splash_screen_img.png)
-![App Screenshot](./assets/main_screen_img1.png)
-![App Screenshot](./assets/main_screen_img2.png)
-![App Screenshot](./assets/empty_data.png)
-![App Screenshot](./assets/edit_screen_img1.png)
+<img src="./assets/splash_screen_img.png" height="300"  alt="image"/>
+<img src="./assets/main_screen_img1.png" height="300"  alt="image"/>
+<img src="./assets/main_screen_img2.png" height="300"  alt="image"/>
+<img src="./assets/empty_data.png" height="300"  alt="image"/>
+<img src="./assets/edit_screen_img1.png" height="300"  alt="image"/>
 
 ---
 
