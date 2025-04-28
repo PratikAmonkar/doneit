@@ -1,6 +1,5 @@
 import 'package:DoneIt/core/Repository/database_repo_impl.dart';
 import 'package:DoneIt/domain/task_bean.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/response_status.dart';
@@ -8,30 +7,44 @@ import '../../domain/response_status.dart';
 class MainScreenProvider {
   final ResponseStatus respTaskList;
   final ResponseStatus respDeleteTask;
+  final String sortBy;
+  final List<String> sortByList;
 
   MainScreenProvider({
     required this.respTaskList,
     required this.respDeleteTask,
+    required this.sortBy,
+    required this.sortByList,
   });
 
   static MainScreenProvider get initial => MainScreenProvider(
     respTaskList: ResponseStatus.onEmpty(),
     respDeleteTask: ResponseStatus.onEmpty(),
+    sortBy: "Created",
+    sortByList: ["Name", "Created", "Updated", "Completed"],
   );
 
   MainScreenProvider copyWith({
     ResponseStatus? respTaskList,
     ResponseStatus? respDeleteTask,
+    String? sortBy,
+    List<String>? sortByList,
   }) {
     return MainScreenProvider(
       respTaskList: respTaskList ?? this.respTaskList,
       respDeleteTask: respDeleteTask ?? this.respDeleteTask,
+      sortBy: sortBy ?? this.sortBy,
+      sortByList: sortByList ?? this.sortByList,
     );
   }
 }
 
 class MainScreenNotifier extends StateNotifier<MainScreenProvider> {
   MainScreenNotifier() : super(MainScreenProvider.initial);
+
+  void changeSortBy({required String sortBy}) {
+    state = state.copyWith(sortBy: sortBy);
+  }
 
   void resetTaskListState() {
     state = state.copyWith(respTaskList: ResponseStatus.onEmpty());
@@ -43,7 +56,7 @@ class MainScreenNotifier extends StateNotifier<MainScreenProvider> {
 
   void getTaskList() async {
     state = state.copyWith(respTaskList: ResponseStatus.onLoading());
-    var response = await DatabaseRepository.getAllTasks();
+    var response = await DatabaseRepository.getAllTasks(sortBy: state.sortBy);
     if (response.isSuccess) {
       var successState =
           (response.data as List).map((productJson) {
@@ -156,9 +169,49 @@ class MainScreenNotifier extends StateNotifier<MainScreenProvider> {
       );
       currentList[index] = updatedTask;
       state = state.copyWith(
-        respTaskList: ResponseStatus.onSuccess(currentList),
+        respTaskList: ResponseStatus.onSuccess(
+          getSortedTasks(currentList, state.sortBy),
+        ),
       );
     }
+  }
+
+  List<TaskBean> getSortedTasks(List<TaskBean> tasks, String sortBy) {
+    final sortedList = List<TaskBean>.from(tasks);
+
+    switch (sortBy) {
+      case "Name":
+        sortedList.sort(
+          (a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()),
+        );
+        break;
+      case "Created":
+        sortedList.sort(
+          (a, b) =>
+              DateTime.parse(b.created).compareTo(DateTime.parse(a.created)),
+        );
+        break;
+      case "Updated":
+        sortedList.sort(
+          (a, b) => DateTime.parse(
+            b.updated ?? "",
+          ).compareTo(DateTime.parse(a.updated ?? "")),
+        );
+        break;
+      case "Completed":
+        sortedList.sort(
+          (a, b) => (b.todosDoneCount ?? 0).compareTo(a.todosDoneCount ?? 0),
+        );
+        break;
+      default:
+        sortedList.sort(
+          (a, b) =>
+              DateTime.parse(b.created).compareTo(DateTime.parse(a.created)),
+        );
+        break;
+    }
+
+    return sortedList;
   }
 }
 

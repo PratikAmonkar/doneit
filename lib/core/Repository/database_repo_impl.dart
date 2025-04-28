@@ -1,17 +1,32 @@
 import 'package:DoneIt/domain/task_bean.dart';
 import 'package:DoneIt/domain/todo_bean.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../domain/response_status.dart';
 import '../configuration/database_config.dart';
 
 class DatabaseRepository {
-  static final _uuid = Uuid();
+  static String _getOrderByClause(String sortBy) {
+    switch (sortBy) {
+      case "Name":
+        return "tasks.title COLLATE NOCASE ASC";
+      case "Created":
+        return "tasks.created DESC";
+      case "Updated":
+        return "tasks.updated DESC";
+      case "Completed":
+        return "completedTodosCount DESC";
+      default:
+        return "tasks.created DESC";
+    }
+  }
 
-  static Future<ResponseStatus> getAllTasks() async {
+  static Future<ResponseStatus> getAllTasks({required String sortBy}) async {
     try {
       final db = await DatabaseConfig.initializeDb();
+
+      final orderByClause = _getOrderByClause(sortBy);
+
       final result = await db.rawQuery('''
           SELECT 
             tasks.*,
@@ -20,9 +35,8 @@ class DatabaseRepository {
           FROM tasks
           LEFT JOIN todos ON tasks.id = todos.task_id
           GROUP BY tasks.id
-          ORDER BY tasks.created DESC;
+          ORDER BY $orderByClause;
         ''');
-
       return ResponseStatus.onSuccess(result);
     } catch (e) {
       return ResponseStatus.onError(

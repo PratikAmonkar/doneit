@@ -26,6 +26,10 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   bool _showFab = true;
   bool _showAppBar = true;
 
+  bool showCheckBox = false;
+
+  List<TaskBean> deleteTaskList = [];
+
   @override
   void initState() {
     super.initState();
@@ -34,7 +38,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       statusBarColor: AppColors.lightBackground,
       navigationColor: AppColors.lightBackground,
     );
-
     _scrollController.addListener(() {
       final direction = _scrollController.position.userScrollDirection;
       if (direction == ScrollDirection.reverse) {
@@ -127,226 +130,272 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           child: Stack(
             children: [
               if (mainProvider.respTaskList.isSuccess) ...[
-                MainScreenSuccessState(
-                  mainScreenProvider: mainProvider,
-                  scrollController: _scrollController,
-                  showAppBar: _showAppBar,
-                ),
-              ],
-              if (mainProvider.respTaskList.isLoading) ...[
-                Center(child: CircularProgressIndicator()),
-              ],
-
-              if (mainProvider.respTaskList.isError) ...[
-                textBold(title: "Error found"),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class MainScreenSuccessState extends ConsumerStatefulWidget {
-  final MainScreenProvider mainScreenProvider;
-  final bool showAppBar;
-  final ScrollController scrollController;
-
-  const MainScreenSuccessState({
-    super.key,
-    required this.mainScreenProvider,
-    required this.showAppBar,
-    required this.scrollController,
-  });
-
-  @override
-  ConsumerState<MainScreenSuccessState> createState() =>
-      _MainScreenSuccessStateState();
-}
-
-class _MainScreenSuccessStateState
-    extends ConsumerState<MainScreenSuccessState> {
-  bool showCheckBox = false;
-
-  List<TaskBean> deleteTaskList = [];
-
-  @override
-  Widget build(BuildContext context) {
-    final List<TaskBean> taskList =
-        widget.mainScreenProvider.respTaskList.data ?? List.empty();
-    return Column(
-      children: [
-        AnimatedContainer(
-          height: widget.showAppBar ? 56.0 : 0.0,
-          duration: Duration(milliseconds: 500),
-          child: AnimatedOpacity(
-            opacity: widget.showAppBar ? 1.0 : 0.0,
-            duration: const Duration(milliseconds: 300),
-            child: AppBar(
-              backgroundColor: AppColors.lightBackground,
-              surfaceTintColor: AppColors.lightBackground,
-              title: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  textBold(title: "Hey Buddy!", fontSize: 22.0),
-                  textBold(title: CommonUtil().greetUser(), fontSize: 14.0),
-                ],
-              ),
-              actions:
-                  taskList.isNotEmpty
-                      ? [
-                        GestureDetector(
-                          onTap: () {
-                            if (showCheckBox && deleteTaskList.isNotEmpty) {
-                              ref
-                                  .read(mainScreenProvider.notifier)
-                                  .deleteTask(taskBean: deleteTaskList);
-                            }
-                            setState(() {
-                              deleteTaskList = [];
-                              showCheckBox = !showCheckBox;
-                            });
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16.0,
-                            ),
-                            child: Icon(
-                              Icons.delete_outline_rounded,
-                              color: AppColors.lightRed100,
-                              size: 24.0,
-                            ),
-                          ),
-                        ),
-                      ]
-                      : null,
-            ),
-          ),
-        ),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child:
-                taskList.isEmpty
-                    ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Image.asset(
-                          "assets/empty_data.png",
-                          width: 100.0,
-                          height: 100.0,
-                        ),
-                        verticalSpacer(),
-                        textBold(title: "No task available", fontSize: 14.0),
-                      ],
-                    )
-                    : SingleChildScrollView(
-                      controller: widget.scrollController,
-                      child: Column(
-                        children: [
-                          /*
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Column(
+                  children: [
+                    AnimatedContainer(
+                      height: _showAppBar ? 56.0 : 0.0,
+                      duration: Duration(milliseconds: 500),
+                      child: AnimatedOpacity(
+                        opacity: _showAppBar ? 1.0 : 0.0,
+                        duration: const Duration(milliseconds: 300),
+                        child: AppBar(
+                          backgroundColor: AppColors.lightBackground,
+                          surfaceTintColor: AppColors.lightBackground,
+                          title: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
-                                children: [
-                                  textBold(
-                                    title: "Sort by : All",
-                                    fontSize: 14.0,
-                                  ),
-                                  PopupMenuButton(
-                                    icon: const Icon(
-                                      Icons.more_vert,
-                                      size: 20.0,
-                                    ),
-                                    onSelected: (value) {},
-                                    itemBuilder:
-                                        (BuildContext context) => [
-                                          PopupMenuItem(
-                                            value: 'option1',
-                                            child: textBold(
-                                              title: 'Option 1',
-                                              fontSize: 12.0,
-                                            ),
-                                          ),
-                                        ],
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  textBold(
-                                    title: "Priority by : All",
-                                    fontSize: 14.0,
-                                  ),
-                                  PopupMenuButton(
-                                    icon: const Icon(
-                                      Icons.more_vert,
-                                      size: 20.0,
-                                    ),
-                                    onSelected: (value) {},
-                                    itemBuilder:
-                                        (BuildContext context) => [
-                                          PopupMenuItem(
-                                            value: 'option1',
-                                            child: textBold(
-                                              title: 'Option 1',
-                                              fontSize: 12.0,
-                                            ),
-                                          ),
-                                        ],
-                                  ),
-                                ],
+                              textBold(title: "Hey Buddy!", fontSize: 22.0),
+                              textBold(
+                                title: CommonUtil().greetUser(),
+                                fontSize: 14.0,
                               ),
                             ],
                           ),
-*/
-                          verticalSpacer(value: 10.0),
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: taskList.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              final TaskBean taskBean = taskList[index];
-
-                              return GestureDetector(
-                                onTap: () {
-                                  GoRouter.of(context).push(
-                                    "/add-edit-screen/${taskBean.id}/${taskBean.title}",
-                                  );
-                                },
-                                child: Container(
-                                  margin: const EdgeInsets.only(bottom: 20.0),
-                                  padding: const EdgeInsets.all(16.0),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                    color: AppColors.lightPurple100,
-                                  ),
-                                  child: Row(
+                          actions:
+                              (mainProvider.respTaskList.data ?? List.empty())
+                                      .isNotEmpty
+                                  ? [
+                                    GestureDetector(
+                                      onTap: () {
+                                        if (showCheckBox &&
+                                            deleteTaskList.isNotEmpty) {
+                                          ref
+                                              .read(mainScreenProvider.notifier)
+                                              .deleteTask(
+                                                taskBean: deleteTaskList,
+                                              );
+                                        }
+                                        setState(() {
+                                          deleteTaskList = [];
+                                          showCheckBox = !showCheckBox;
+                                        });
+                                      },
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 16.0,
+                                        ),
+                                        child: Icon(
+                                          Icons.delete_outline_rounded,
+                                          color: AppColors.lightRed100,
+                                          size: 24.0,
+                                        ),
+                                      ),
+                                    ),
+                                  ]
+                                  : null,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child:
+                            (mainProvider.respTaskList.data ?? List.empty())
+                                    .isEmpty
+                                ? Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Image.asset(
+                                      "assets/empty_data.png",
+                                      width: 100.0,
+                                      height: 100.0,
+                                    ),
+                                    verticalSpacer(),
+                                    textBold(
+                                      title: "No task available",
+                                      fontSize: 14.0,
+                                    ),
+                                  ],
+                                )
+                                : SingleChildScrollView(
+                                  controller: _scrollController,
+                                  child: Column(
                                     children: [
-                                      if (showCheckBox) ...[
-                                        checkBox(
-                                          isChecked: deleteTaskList.contains(
-                                            taskBean,
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              textBold(
+                                                title:
+                                                    "Sort by : ${mainProvider.sortBy}",
+                                                fontSize: 14.0,
+                                              ),
+                                              PopupMenuButton(
+                                                icon: const Icon(
+                                                  Icons.more_vert,
+                                                  size: 20.0,
+                                                  color: Colors.black,
+                                                ),
+                                                onSelected: (value) {
+                                                  WidgetsBinding.instance
+                                                      .addPostFrameCallback((
+                                                        _,
+                                                      ) {
+                                                        ref
+                                                            .read(
+                                                              mainScreenProvider
+                                                                  .notifier,
+                                                            )
+                                                            .changeSortBy(
+                                                              sortBy: value,
+                                                            );
+                                                        ref
+                                                            .read(
+                                                              mainScreenProvider
+                                                                  .notifier,
+                                                            )
+                                                            .resetTaskListState();
+                                                      });
+                                                },
+                                                itemBuilder: (
+                                                  BuildContext context,
+                                                ) {
+                                                  return mainProvider.sortByList.map((
+                                                    String option,
+                                                  ) {
+                                                    return PopupMenuItem(
+                                                      value: option,
+                                                      child: Text(
+                                                        option,
+                                                        style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontSize: 12.0,
+                                                          color:
+                                                              mainProvider.sortBy ==
+                                                                      option
+                                                                  ? AppColors
+                                                                      .lightPurple200
+                                                                  : Colors
+                                                                      .black,
+                                                        ),
+                                                      ),
+                                                    );
+                                                  }).toList();
+                                                },
+                                              ),
+                                            ],
                                           ),
-                                          borderColor: AppColors.lightPurple200,
-                                          onTapAction: () {
-                                            setState(() {
-                                              if (deleteTaskList.contains(
-                                                    taskBean,
-                                                  ) !=
-                                                  true) {
-                                                deleteTaskList.add(taskBean);
-                                              } else {
-                                                deleteTaskList.removeWhere(
-                                                  (t) => t.id == taskBean.id,
-                                                );
-                                              }
-                                            });
+                                          /*
+                                          Row(
+                                            children: [
+                                              textBold(
+                                                title:
+                                                    "Priority by : ${priorityBy}",
+                                                fontSize: 14.0,
+                                              ),
+                                              PopupMenuButton(
+                                                icon: const Icon(
+                                                  Icons.more_vert,
+                                                  size: 20.0,
+                                                  color: Colors.black,
+                                                ),
+                                                onSelected: (value) {
+                                                  setState(() {
+                                                    priorityBy = value;
+                                                  });
+                                                },
+                                                itemBuilder: (
+                                                  BuildContext context,
+                                                ) {
+                                                  return priorityByList.map((
+                                                    String option,
+                                                  ) {
+                                                    return PopupMenuItem(
+                                                      value: option,
+                                                      child: Text(
+                                                        option,
+                                                        style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontSize: 12.0,
+                                                          color:
+                                                              priorityBy ==
+                                                                      option
+                                                                  ? AppColors
+                                                                      .lightPurple200
+                                                                  : Colors
+                                                                      .black,
+                                                        ),
+                                                      ),
+                                                    );
+                                                  }).toList();
+                                                },
+                                              ),
+                                            ],
+                                          ),
+*/
+                                        ],
+                                      ),
+                                      verticalSpacer(value: 10.0),
+                                      ListView.builder(
+                                        shrinkWrap: true,
+                                        physics:
+                                            const NeverScrollableScrollPhysics(),
+                                        itemCount:
+                                            (mainProvider.respTaskList.data ??
+                                                    List.empty())
+                                                .length,
+                                        itemBuilder: (
+                                          BuildContext context,
+                                          int index,
+                                        ) {
+                                          final TaskBean taskBean =
+                                              (mainProvider.respTaskList.data ??
+                                                  List.empty())[index];
 
-                                            /*WidgetsBinding.instance
+                                          return GestureDetector(
+                                            onTap: () {
+                                              GoRouter.of(context).push(
+                                                "/add-edit-screen/${taskBean.id}/${taskBean.title}",
+                                              );
+                                            },
+                                            child: Container(
+                                              margin: const EdgeInsets.only(
+                                                bottom: 20.0,
+                                              ),
+                                              padding: const EdgeInsets.all(
+                                                16.0,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(10.0),
+                                                color: AppColors.lightPurple100,
+                                              ),
+                                              child: Row(
+                                                children: [
+                                                  if (showCheckBox) ...[
+                                                    checkBox(
+                                                      isChecked: deleteTaskList
+                                                          .contains(taskBean),
+                                                      borderColor:
+                                                          AppColors
+                                                              .lightPurple200,
+                                                      onTapAction: () {
+                                                        setState(() {
+                                                          if (deleteTaskList
+                                                                  .contains(
+                                                                    taskBean,
+                                                                  ) !=
+                                                              true) {
+                                                            deleteTaskList.add(
+                                                              taskBean,
+                                                            );
+                                                          } else {
+                                                            deleteTaskList
+                                                                .removeWhere(
+                                                                  (t) =>
+                                                                      t.id ==
+                                                                      taskBean
+                                                                          .id,
+                                                                );
+                                                          }
+                                                        });
+
+                                                        /*WidgetsBinding.instance
                                               .addPostFrameCallback((_) {
                                             ref
                                                 .read(
@@ -363,21 +412,26 @@ class _MainScreenSuccessStateState
                                               ),
                                             );
                                           });*/
-                                          },
-                                          activeColor: AppColors.lightPurple200,
-                                        ),
-                                        horizontalSpacer(value: 20.0),
-                                      ],
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            textBold(
-                                              title: taskBean.title,
-                                              fontSize: 18.0,
-                                            ),
-                                            /*      Row(
+                                                      },
+                                                      activeColor:
+                                                          AppColors
+                                                              .lightPurple200,
+                                                    ),
+                                                    horizontalSpacer(
+                                                      value: 20.0,
+                                                    ),
+                                                  ],
+                                                  Expanded(
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        textBold(
+                                                          title: taskBean.title,
+                                                          fontSize: 18.0,
+                                                        ),
+                                                        /*      Row(
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.center,
                                               mainAxisAlignment:
@@ -407,32 +461,48 @@ class _MainScreenSuccessStateState
                                                 ),
                                               ],
                                             ),*/
-                                            textBold(
-                                              title:
-                                                  "Completed ${taskBean.todosDoneCount} out of ${taskBean.totalTodosCount}",
-                                              fontSize: 10.0,
+                                                        textBold(
+                                                          title:
+                                                              "Completed ${taskBean.todosDoneCount} out of ${taskBean.totalTodosCount}",
+                                                          fontSize: 10.0,
+                                                        ),
+                                                        textMedium(
+                                                          title:
+                                                              "${taskBean.updated != null ? "Last updated :" : "created :"} ${taskBean.updated != null ? CommonUtil().getDate(option: 1, value: taskBean.updated ?? "") : CommonUtil().getDate(option: 1, value: taskBean.created)}",
+                                                          fontSize: 10.0,
+                                                          fontColor:
+                                                              Colors
+                                                                  .grey
+                                                                  .shade900,
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
                                             ),
-                                            textMedium(
-                                              title:
-                                                  "${taskBean.updated != null ? "Last updated :" : "created :"} ${taskBean.updated != null ? CommonUtil().getDate(option: 1, value: taskBean.updated ?? "") : CommonUtil().getDate(option: 1, value: taskBean.created)}",
-                                              fontSize: 10.0,
-                                              fontColor: Colors.grey.shade900,
-                                            ),
-                                          ],
-                                        ),
+                                          );
+                                        },
                                       ),
                                     ],
                                   ),
                                 ),
-                              );
-                            },
-                          ),
-                        ],
                       ),
                     ),
+                  ],
+                ),
+              ],
+              if (mainProvider.respTaskList.isLoading) ...[
+                Center(child: CircularProgressIndicator()),
+              ],
+
+              if (mainProvider.respTaskList.isError) ...[
+                textBold(title: "Error found"),
+              ],
+            ],
           ),
         ),
-      ],
+      ),
     );
   }
 }
