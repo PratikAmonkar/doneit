@@ -1,5 +1,6 @@
 import 'package:DoneIt/core/Repository/database_repo_impl.dart';
 import 'package:DoneIt/domain/task_bean.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/response_status.dart';
@@ -62,6 +63,7 @@ class MainScreenNotifier extends StateNotifier<MainScreenProvider> {
           (response.data as List).map((productJson) {
             return TaskBean.fromJson(productJson);
           }).toList();
+
       state = state.copyWith(
         respTaskList: ResponseStatus.onSuccess(successState),
       );
@@ -88,25 +90,37 @@ class MainScreenNotifier extends StateNotifier<MainScreenProvider> {
     required String taskId,
     required int todosCount,
   }) async {
+    debugPrint("Task id = $taskId");
+    debugPrint("Todo count = $todosCount");
+
     List<TaskBean> currentList = List<TaskBean>.from(state.respTaskList.data);
+    debugPrint("Current list = $currentList");
     final index = currentList.indexWhere((task) => task.id == taskId);
+    debugPrint("Index = $index");
     final updatedAt = DateTime.now().toIso8601String();
     var response = await DatabaseRepository.updateTaskUpdatedAt(
       taskId,
       updatedAt,
     );
+
     if (response.isSuccess) {
+      debugPrint("Test 1");
       if (index != -1) {
+        debugPrint("Test 2");
         final updatedTask = currentList[index].copyWith(
           totalTodosCount: todosCount,
           updated: updatedAt,
         );
+        debugPrint("updatedTask = ${updatedTask.toJson()}");
         currentList[index] = updatedTask;
+        debugPrint("currentList = ${currentList.toString()}");
         state = state.copyWith(
           respTaskList: ResponseStatus.onSuccess(currentList),
         );
       }
+      debugPrint("Test 3");
     }
+    debugPrint("Test 4");
   }
 
   void updateTodoDoneCount({

@@ -158,12 +158,15 @@ class AddEditScreenNotifier extends StateNotifier<AddEditScreenProvider> {
   void deleteTodo({required String todoId}) async {
     var response = await DatabaseRepository.deleteTodo(todoId);
     if (response.isSuccess) {
+      debugPrint("Todo id = $todoId");
       List<TodoBean> currentTodos = [];
       currentTodos = List<TodoBean>.from(state.respTodoList.data);
+      debugPrint("CurrentTodos before = $currentTodos");
       currentTodos.removeWhere((value) => value.id == todoId);
+      debugPrint("CurrentTodos after = $currentTodos");
       state = state.copyWith(
         respTodoList: ResponseStatus.onSuccess(currentTodos),
-        respDeleteTodo: ResponseStatus.onSuccess(currentTodos),
+        respDeleteTodo: ResponseStatus.onSuccess(todoId),
       );
     } else {
       state = state.copyWith(

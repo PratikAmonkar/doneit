@@ -44,8 +44,8 @@ class TaskBean {
       priority: json['priority'] as String?,
       created: json['created'] as String,
       updated: json['updated'] as String?,
-      todosDoneCount: json['completedTodosCount'] ?? 0,
-      totalTodosCount: json['totalTodosCount'] ?? 0,
+      todosDoneCount: json['total_todos_done'] ?? 0,
+      totalTodosCount: json['total_todos_count'] ?? 0,
     );
   }
 
@@ -56,6 +56,8 @@ class TaskBean {
       'priority': priority,
       'created': created,
       'updated': updated,
+      'total_todos_done': todosDoneCount,
+      'total_todos_count': totalTodosCount,
     };
   }
 }

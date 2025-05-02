@@ -279,55 +279,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                                               ),
                                             ],
                                           ),
-                                          /*
-                                          Row(
-                                            children: [
-                                              textBold(
-                                                title:
-                                                    "Priority by : ${priorityBy}",
-                                                fontSize: 14.0,
-                                              ),
-                                              PopupMenuButton(
-                                                icon: const Icon(
-                                                  Icons.more_vert,
-                                                  size: 20.0,
-                                                  color: Colors.black,
-                                                ),
-                                                onSelected: (value) {
-                                                  setState(() {
-                                                    priorityBy = value;
-                                                  });
-                                                },
-                                                itemBuilder: (
-                                                  BuildContext context,
-                                                ) {
-                                                  return priorityByList.map((
-                                                    String option,
-                                                  ) {
-                                                    return PopupMenuItem(
-                                                      value: option,
-                                                      child: Text(
-                                                        option,
-                                                        style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          fontSize: 12.0,
-                                                          color:
-                                                              priorityBy ==
-                                                                      option
-                                                                  ? AppColors
-                                                                      .lightPurple200
-                                                                  : Colors
-                                                                      .black,
-                                                        ),
-                                                      ),
-                                                    );
-                                                  }).toList();
-                                                },
-                                              ),
-                                            ],
-                                          ),
-*/
                                         ],
                                       ),
                                       verticalSpacer(value: 10.0),
@@ -346,6 +297,10 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                                           final TaskBean taskBean =
                                               (mainProvider.respTaskList.data ??
                                                   List.empty())[index];
+
+                                          debugPrint(
+                                            "Task bean = ${taskBean.toJson()}",
+                                          );
 
                                           return GestureDetector(
                                             onTap: () {

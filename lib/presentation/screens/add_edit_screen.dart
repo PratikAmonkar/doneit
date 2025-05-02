@@ -53,6 +53,21 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
   Widget build(BuildContext context) {
     final addEditProvider = ref.watch(addEditScreenProvider);
 
+    if (widget.id != null) {
+      if (addEditProvider.respTodoList.isEmpty) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ref
+              .read(addEditScreenProvider.notifier)
+              .getTodoList(taskId: widget.id ?? "");
+        });
+      }
+      if (addEditProvider.respTodoList.isSuccess) {
+        setState(() {
+          todosList = addEditProvider.respTodoList.data;
+        });
+      }
+    }
+
     if (addEditProvider.respUpdateTaskTitle.isSuccess) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         showSnackBarMessage(
@@ -96,20 +111,19 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
     }
 
     if (addEditProvider.respDeleteTodo.isSuccess) {
-      final List<TodoBean> newTodoList = addEditProvider.respDeleteTodo.data;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ref
             .read(mainScreenProvider.notifier)
             .updateTodoTotalCount(
               taskId: widget.id ?? "",
-              todosCount: newTodoList.length,
+              todosCount: todosList.length,
             );
         ref
             .read(mainScreenProvider.notifier)
             .updateTodoDoneCount(
               taskId: widget.id ?? "",
               todoDoneCount:
-                  newTodoList
+                  todosList
                       .where((value) => value.isDone == true)
                       .toList()
                       .length,
@@ -166,13 +180,13 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
           primaryTitle: "Todo added!!",
           onCloseAction: () {},
         );
-        ref.read(addEditScreenProvider.notifier).resetAddTodoState();
         ref
             .read(mainScreenProvider.notifier)
             .updateTodoTotalCount(
               taskId: widget.id ?? "",
               todosCount: todosList.length,
             );
+        ref.read(addEditScreenProvider.notifier).resetAddTodoState();
       });
     }
 
@@ -185,21 +199,6 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
         );
         ref.read(addEditScreenProvider.notifier).resetAddTodoState();
       });
-    }
-
-    if (widget.id != null) {
-      if (addEditProvider.respTodoList.isEmpty) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          ref
-              .read(addEditScreenProvider.notifier)
-              .getTodoList(taskId: widget.id ?? "");
-        });
-      }
-      if (addEditProvider.respTodoList.isSuccess) {
-        setState(() {
-          todosList = addEditProvider.respTodoList.data;
-        });
-      }
     }
 
     return WillPopScope(
@@ -425,10 +424,6 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
                                       Align(
                                         alignment: Alignment.centerRight,
                                         child: textMedium(
-                                          /*title: CommonUtil().getDate(
-                                            option: 1,
-                                            value: todo.created,
-                                          ),*/
                                           title:
                                               "${todo.updated != null ? "Last updated :" : "created :"} ${todo.updated != null ? CommonUtil().getDate(option: 1, value: todo.updated ?? "") : CommonUtil().getDate(option: 1, value: todo.created)}",
                                           fontSize: 10.0,

@@ -14,16 +14,34 @@ class DatabaseConfig {
 
     _db = await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
       onCreate: (Database db, int version) async {
         await _createTables(db);
       },
+      onUpgrade: (Database db, int oldVersion, int newVersion) async {
+        await _migrateDb(db, oldVersion, newVersion);
+      },
     );
 
     return _db!;
+  }
+
+  static Future<void> _migrateDb(
+    Database db,
+    int oldVersion,
+    int newVersion,
+  ) async {
+    if (oldVersion < 2) {
+      await db.execute(
+        'ALTER TABLE tasks ADD COLUMN total_todos_count INTEGER DEFAULT 0;',
+      );
+      await db.execute(
+        'ALTER TABLE tasks ADD COLUMN total_todos_done INTEGER DEFAULT 0;',
+      );
+    }
   }
 
   static Future<void> _createTables(Database db) async {
