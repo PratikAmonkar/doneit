@@ -139,7 +139,7 @@ class AddEditScreenNotifier extends StateNotifier<AddEditScreenProvider> {
       );
 
       if (index != -1) {
-        currentTodos[index] = todo;
+        currentTodos[index] = response.data;
         state = state.copyWith(
           respTodoList: ResponseStatus.onSuccess(currentTodos),
           respUpdateTodoStatus: ResponseStatus.onSuccess(currentTodos),
@@ -158,12 +158,9 @@ class AddEditScreenNotifier extends StateNotifier<AddEditScreenProvider> {
   void deleteTodo({required String todoId}) async {
     var response = await DatabaseRepository.deleteTodo(todoId);
     if (response.isSuccess) {
-      debugPrint("Todo id = $todoId");
       List<TodoBean> currentTodos = [];
       currentTodos = List<TodoBean>.from(state.respTodoList.data);
-      debugPrint("CurrentTodos before = $currentTodos");
       currentTodos.removeWhere((value) => value.id == todoId);
-      debugPrint("CurrentTodos after = $currentTodos");
       state = state.copyWith(
         respTodoList: ResponseStatus.onSuccess(currentTodos),
         respDeleteTodo: ResponseStatus.onSuccess(todoId),

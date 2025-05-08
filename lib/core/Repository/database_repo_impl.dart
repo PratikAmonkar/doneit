@@ -81,19 +81,52 @@ class DatabaseRepository {
   static Future<ResponseStatus> deleteTodo(String todoId) async {
     try {
       final db = await DatabaseConfig.initializeDb();
-      final rowsDeleted = await db.delete(
-        'todos',
-        where: 'id = ?',
-        whereArgs: [todoId],
-      );
 
-      if (rowsDeleted > 0) {
-        return ResponseStatus.onSuccess(todoId);
-      } else {
-        return ResponseStatus.onError(
-          ApiErrorDetails(message: 'Todo not found', statusCode: 404),
+      await db.transaction((txn) async {
+        final now = DateTime.now().toIso8601String();
+        final todo = await txn.query(
+          'todos',
+          columns: ['task_id', 'is_done'],
+          where: 'id = ?',
+          whereArgs: [todoId],
+          limit: 1,
         );
-      }
+
+        if (todo.isEmpty) {
+          throw Exception('Todo not found');
+        }
+
+        final taskId = todo.first['task_id'];
+        final isDone = todo.first['is_done'] == 1;
+
+        final rowsDeleted = await txn.delete(
+          'todos',
+          where: 'id = ?',
+          whereArgs: [todoId],
+        );
+
+        if (rowsDeleted == 0) {
+          throw Exception('Failed to delete todo');
+        }
+
+        final updateQuery = StringBuffer('''
+        UPDATE tasks
+        SET 
+          total_todos_count = CASE WHEN total_todos_count > 0 THEN total_todos_count - 1 ELSE 0 END,
+          updated = ?
+      ''');
+
+        if (isDone) {
+          updateQuery.write('''
+          , total_todos_done = CASE WHEN total_todos_done > 0 THEN total_todos_done - 1 ELSE 0 END
+        ''');
+        }
+
+        updateQuery.write(' WHERE id = ?');
+        await txn.rawUpdate(updateQuery.toString(), [now, taskId]);
+      });
+
+      return ResponseStatus.onSuccess(todoId);
     } catch (e) {
       return ResponseStatus.onError(
         ApiErrorDetails(message: 'Failed to delete todo', statusCode: 500),
@@ -122,7 +155,20 @@ class DatabaseRepository {
     try {
       final db = await DatabaseConfig.initializeDb();
 
-      await db.insert('todos', todoBean.toJson());
+      await db.transaction((txn) async {
+        final now = DateTime.now().toIso8601String();
+        await txn.insert('todos', todoBean.toJson());
+        await txn.rawUpdate(
+          '''
+        UPDATE tasks
+        SET 
+          total_todos_count = total_todos_count + 1,
+          updated = ?
+        WHERE id = ?
+        ''',
+          [now, todoBean.taskId],
+        );
+      });
 
       return ResponseStatus.onSuccess(todoBean);
     } catch (e) {
@@ -133,44 +179,54 @@ class DatabaseRepository {
   }
 
   static Future<ResponseStatus> updateTodoStatus(TodoBean todoBean) async {
+    final now = DateTime.now().toIso8601String();
     try {
       final db = await DatabaseConfig.initializeDb();
 
-      await db.insert(
-        'todos',
-        todoBean.toJson(),
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
+      await db.transaction((txn) async {
+        final existingTodo = await txn.query(
+          'todos',
+          columns: ['is_done', 'task_id'],
+          where: 'id = ?',
+          whereArgs: [todoBean.id],
+          limit: 1,
+        );
+        if (existingTodo.isEmpty) {
+          throw Exception('Todo not found');
+        }
+        final currentIsDone = existingTodo.first['is_done'] == 1;
+        final newIsDone = todoBean.isDone == true;
+        final taskId = existingTodo.first['task_id'];
 
-      return ResponseStatus.onSuccess(todoBean);
+        final updatedTodoJson = Map<String, dynamic>.from(todoBean.toJson());
+        updatedTodoJson['updated'] = now;
+
+        await txn.insert(
+          'todos',
+          updatedTodoJson,
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+        if (currentIsDone != newIsDone) {
+          final updateQuery = StringBuffer('''
+          UPDATE tasks
+          SET total_todos_done = 
+        ''');
+          if (newIsDone) {
+            updateQuery.write('total_todos_done + 1');
+          } else {
+            updateQuery.write(
+              'CASE WHEN total_todos_done > 0 THEN total_todos_done - 1 ELSE 0 END',
+            );
+          }
+          updateQuery.write(', updated = ? WHERE id = ?');
+          await txn.rawUpdate(updateQuery.toString(), [now, taskId]);
+        }
+      });
+
+      return ResponseStatus.onSuccess(todoBean.copyWith(updated: now));
     } catch (e) {
       return ResponseStatus.onError(
         ApiErrorDetails(message: 'Failed to update todo', statusCode: 500),
-      );
-    }
-  }
-
-  static Future<ResponseStatus> updateTaskUpdatedAt(
-    String taskId,
-    String dateTime,
-  ) async {
-    try {
-      final db = await DatabaseConfig.initializeDb();
-
-      await db.update(
-        'tasks',
-        {'updated': dateTime},
-        where: 'id = ?',
-        whereArgs: [taskId],
-      );
-
-      return ResponseStatus.onSuccess(dateTime);
-    } catch (e) {
-      return ResponseStatus.onError(
-        ApiErrorDetails(
-          message: 'Failed to update todo timestamp',
-          statusCode: 500,
-        ),
       );
     }
   }
@@ -205,7 +261,7 @@ class DatabaseRepository {
       final db = await DatabaseConfig.initializeDb();
       await db.update(
         'tasks',
-        {'title': title},
+        {'title': title, 'updated': DateTime.now().toIso8601String()},
         where: 'id = ?',
         whereArgs: [taskId],
       );

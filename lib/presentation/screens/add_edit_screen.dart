@@ -79,9 +79,7 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
           editTaskName = false;
           taskName = taskNameController.text;
         });
-        ref
-            .read(mainScreenProvider.notifier)
-            .updateTaskTitle(taskId: widget.id ?? "", title: taskName);
+        ref.read(mainScreenProvider.notifier).getTaskList();
         ref.read(addEditScreenProvider.notifier).resetTaskTitleState();
       });
     }
@@ -102,9 +100,7 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
 
     if (addEditProvider.respAddTask.isSuccess) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref
-            .read(mainScreenProvider.notifier)
-            .addTaskToList(task: addEditProvider.respAddTask.data);
+        ref.read(mainScreenProvider.notifier).getTaskList();
         ref.read(addEditScreenProvider.notifier).resetAddTaskState();
         GoRouter.of(context).pop();
       });
@@ -112,22 +108,12 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
 
     if (addEditProvider.respDeleteTodo.isSuccess) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref
-            .read(mainScreenProvider.notifier)
-            .updateTodoTotalCount(
-              taskId: widget.id ?? "",
-              todosCount: todosList.length,
-            );
-        ref
-            .read(mainScreenProvider.notifier)
-            .updateTodoDoneCount(
-              taskId: widget.id ?? "",
-              todoDoneCount:
-                  todosList
-                      .where((value) => value.isDone == true)
-                      .toList()
-                      .length,
-            );
+        showSnackBarMessage(
+          context: context,
+          primaryTitle: "Todo delete successfully",
+          onCloseAction: () {},
+        );
+        ref.read(mainScreenProvider.notifier).getTaskList();
         ref.read(addEditScreenProvider.notifier).resetDeleteTodoState();
       });
     }
@@ -145,7 +131,7 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
 
     if (addEditProvider.respUpdateTodoStatus.isSuccess) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref
+        /*        ref
             .read(mainScreenProvider.notifier)
             .updateTodoDoneCount(
               taskId: widget.id ?? "",
@@ -154,7 +140,8 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
                       .where((value) => value.isDone == true)
                       .toList()
                       .length,
-            );
+            );*/
+        ref.read(mainScreenProvider.notifier).getTaskList();
         ref.read(addEditScreenProvider.notifier).resetUpdateTodoStatusState();
       });
     }
@@ -177,15 +164,10 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
         });
         showSnackBarMessage(
           context: context,
-          primaryTitle: "Todo added!!",
+          primaryTitle: "New Todo added!!",
           onCloseAction: () {},
         );
-        ref
-            .read(mainScreenProvider.notifier)
-            .updateTodoTotalCount(
-              taskId: widget.id ?? "",
-              todosCount: todosList.length,
-            );
+        ref.read(mainScreenProvider.notifier).getTaskList();
         ref.read(addEditScreenProvider.notifier).resetAddTodoState();
       });
     }
@@ -385,9 +367,6 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
                                                           todo: todo.copyWith(
                                                             isDone:
                                                                 !todo.isDone,
-                                                            updated:
-                                                                DateTime.now()
-                                                                    .toIso8601String(),
                                                           ),
                                                         );
                                                   });

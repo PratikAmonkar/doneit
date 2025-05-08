@@ -1,6 +1,5 @@
 import 'package:DoneIt/core/Repository/database_repo_impl.dart';
 import 'package:DoneIt/domain/task_bean.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/response_status.dart';
@@ -82,71 +81,10 @@ class MainScreenNotifier extends StateNotifier<MainScreenProvider> {
     updatedTaskList.insert(0, task);
 
     state = state.copyWith(
-      respTaskList: ResponseStatus.onSuccess(updatedTaskList),
+      respTaskList: ResponseStatus.onSuccess(
+        getSortedTasks(updatedTaskList, state.sortBy),
+      ),
     );
-  }
-
-  void updateTodoTotalCount({
-    required String taskId,
-    required int todosCount,
-  }) async {
-    debugPrint("Task id = $taskId");
-    debugPrint("Todo count = $todosCount");
-
-    List<TaskBean> currentList = List<TaskBean>.from(state.respTaskList.data);
-    debugPrint("Current list = $currentList");
-    final index = currentList.indexWhere((task) => task.id == taskId);
-    debugPrint("Index = $index");
-    final updatedAt = DateTime.now().toIso8601String();
-    var response = await DatabaseRepository.updateTaskUpdatedAt(
-      taskId,
-      updatedAt,
-    );
-
-    if (response.isSuccess) {
-      debugPrint("Test 1");
-      if (index != -1) {
-        debugPrint("Test 2");
-        final updatedTask = currentList[index].copyWith(
-          totalTodosCount: todosCount,
-          updated: updatedAt,
-        );
-        debugPrint("updatedTask = ${updatedTask.toJson()}");
-        currentList[index] = updatedTask;
-        debugPrint("currentList = ${currentList.toString()}");
-        state = state.copyWith(
-          respTaskList: ResponseStatus.onSuccess(currentList),
-        );
-      }
-      debugPrint("Test 3");
-    }
-    debugPrint("Test 4");
-  }
-
-  void updateTodoDoneCount({
-    required String taskId,
-    required int todoDoneCount,
-  }) async {
-    List<TaskBean> currentList = List<TaskBean>.from(state.respTaskList.data);
-
-    final index = currentList.indexWhere((task) => task.id == taskId);
-    final updatedAt = DateTime.now().toIso8601String();
-    var response = await DatabaseRepository.updateTaskUpdatedAt(
-      taskId,
-      updatedAt,
-    );
-    if (response.isSuccess) {
-      if (index != -1) {
-        final updatedTask = currentList[index].copyWith(
-          todosDoneCount: todoDoneCount,
-          updated: updatedAt,
-        );
-        currentList[index] = updatedTask;
-        state = state.copyWith(
-          respTaskList: ResponseStatus.onSuccess(currentList),
-        );
-      }
-    }
   }
 
   void deleteTask({required List<TaskBean> taskBean}) async {
@@ -168,24 +106,6 @@ class MainScreenNotifier extends StateNotifier<MainScreenProvider> {
     } else {
       state = state.copyWith(
         respDeleteTask: ResponseStatus.onError(response.error),
-      );
-    }
-  }
-
-  void updateTaskTitle({required String taskId, required String title}) async {
-    List<TaskBean> currentList = List<TaskBean>.from(state.respTaskList.data);
-
-    final index = currentList.indexWhere((task) => task.id == taskId);
-    if (index != -1) {
-      final updatedTask = currentList[index].copyWith(
-        title: title,
-        updated: DateTime.now().toIso8601String(),
-      );
-      currentList[index] = updatedTask;
-      state = state.copyWith(
-        respTaskList: ResponseStatus.onSuccess(
-          getSortedTasks(currentList, state.sortBy),
-        ),
       );
     }
   }

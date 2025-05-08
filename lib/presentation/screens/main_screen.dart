@@ -10,6 +10,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/util/common_util.dart';
 import '../components/CheckBox/checkbox.dart';
+import '../components/Dialog/dialog.dart';
 import '../components/SnackBar/snackbar_with_action.dart';
 import '../components/System Ui/system_ui.dart';
 
@@ -29,6 +30,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   bool showCheckBox = false;
 
   List<TaskBean> deleteTaskList = [];
+
+  bool showDialog = true;
 
   @override
   void initState() {
@@ -80,7 +83,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           context: context,
           primaryTitle: "Task deleted successfully",
           onCloseAction: () {},
-        );
+        );  
         ref.read(mainScreenProvider.notifier).resetDeleteTaskState();
       });
     }
@@ -95,6 +98,14 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         ref.read(mainScreenProvider.notifier).resetDeleteTaskState();
       });
     }
+
+    void toggleDialog() {
+      setState(() {
+        showDialog = !showDialog;
+      });
+    }
+
+    debugPrint("Dialog = $showDialog");
 
     return WillPopScope(
       onWillPop: () async {
@@ -159,11 +170,13 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                                       onTap: () {
                                         if (showCheckBox &&
                                             deleteTaskList.isNotEmpty) {
-                                          ref
+                                          // toggleDialog();
+                                          showCustomDialog(context: context);
+                                          /*ref
                                               .read(mainScreenProvider.notifier)
                                               .deleteTask(
                                                 taskBean: deleteTaskList,
-                                              );
+                                              );*/
                                         }
                                         setState(() {
                                           deleteTaskList = [];
@@ -349,24 +362,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                                                                 );
                                                           }
                                                         });
-
-                                                        /*WidgetsBinding.instance
-                                              .addPostFrameCallback((_) {
-                                            ref
-                                                .read(
-                                              addEditScreenProvider
-                                                  .notifier,
-                                            )
-                                                .updateTodoStatus(
-                                              todo: todo.copyWith(
-                                                isDone:
-                                                !todo.isDone,
-                                                updated:
-                                                DateTime.now()
-                                                    .toIso8601String(),
-                                              ),
-                                            );
-                                          });*/
                                                       },
                                                       activeColor:
                                                           AppColors
@@ -386,36 +381,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                                                           title: taskBean.title,
                                                           fontSize: 18.0,
                                                         ),
-                                                        /*      Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.spaceBetween,
-                                              children: [
-                                                textBold(
-                                                  title:
-                                                      "Completed ${taskBean.todosDoneCount} out of ${taskBean.totalTodosCount}",
-                                                  fontSize: 10.0,
-                                                ),
-                                                Container(
-                                                  padding: EdgeInsets.symmetric(
-                                                    vertical: 5.0,
-                                                    horizontal: 10.0,
-                                                  ),
-                                                  decoration: BoxDecoration(
-                                                    color: AppColors.lightRed100,
-                                                    borderRadius:
-                                                        BorderRadius.circular(10.0),
-                                                  ),
-                                                  child: textBold(
-                                                    title: taskBean.priority ?? "Low",
-                                                    fontSize: 10.0,
-                                                    fontColor:
-                                                        AppColors.lightBackground,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),*/
                                                         textBold(
                                                           title:
                                                               "Completed ${taskBean.todosDoneCount} out of ${taskBean.totalTodosCount}",
