@@ -83,7 +83,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           context: context,
           primaryTitle: "Task deleted successfully",
           onCloseAction: () {},
-        );  
+        );
         ref.read(mainScreenProvider.notifier).resetDeleteTaskState();
       });
     }
@@ -170,16 +170,33 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                                       onTap: () {
                                         if (showCheckBox &&
                                             deleteTaskList.isNotEmpty) {
-                                          // toggleDialog();
-                                          showCustomDialog(context: context);
-                                          /*ref
-                                              .read(mainScreenProvider.notifier)
-                                              .deleteTask(
-                                                taskBean: deleteTaskList,
-                                              );*/
+                                          showCustomDialog(
+                                            context: context,
+                                            title:
+                                                "Are you sure want to delete?",
+                                            systemUiColor:
+                                                AppColors.lightBackground,
+                                            onSuccessAction: () {
+                                              WidgetsBinding.instance
+                                                  .addPostFrameCallback((_) {
+                                                    ref
+                                                        .read(
+                                                          mainScreenProvider
+                                                              .notifier,
+                                                        )
+                                                        .deleteTask(
+                                                          taskBean:
+                                                              deleteTaskList,
+                                                        );
+                                                    setState(() {
+                                                      deleteTaskList = [];
+                                                    });
+                                                  });
+                                            },
+                                            onDismissAction: () {},
+                                          );
                                         }
                                         setState(() {
-                                          deleteTaskList = [];
                                           showCheckBox = !showCheckBox;
                                         });
                                       },

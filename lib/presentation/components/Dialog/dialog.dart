@@ -31,7 +31,37 @@ Future<void> showMyDialog({
   );
 }
 
-Future<void> showCustomDialog({required BuildContext context}) async {
+Future<void> showCustomDialog({
+  required BuildContext context,
+  required Function onDismissAction,
+  required Function onSuccessAction,
+
+  String iconPath = "assets/delete_round_icon.png",
+  double iconSize = 30.0,
+
+  required String title,
+  double titleFontSize = 14.0,
+  Color titleFontColor = Colors.black,
+  FontWeight titleFontWeight = FontWeight.w700,
+
+  Color dialogColor = Colors.white,
+  double dialogBorderRadius = 10.0,
+
+  Color borderColor = Colors.grey,
+  double borderWidth = 1,
+
+  String firstBtnTitle = "No",
+  double firstBtnSize = 14.0,
+  Color firstBtnColor = Colors.black,
+  FontWeight firstBtnFontWeight = FontWeight.w700,
+
+  String secondBtnTitle = "Yes",
+  double secondBtnSize = 14.0,
+  Color secondBtnColor = Colors.black,
+  FontWeight secondBtnFontWeight = FontWeight.w700,
+
+  Color systemUiColor = Colors.white,
+}) async {
   SystemChrome.setSystemUIOverlayStyle(
     SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
@@ -44,95 +74,184 @@ Future<void> showCustomDialog({required BuildContext context}) async {
     context: context,
     barrierDismissible: false,
     builder: (BuildContext context) {
-      return Dialog(
-        backgroundColor: Colors.transparent,
-        child: Align(
-          alignment: Alignment.center,
+      return WillPopScope(
+        onWillPop: () async {
+          SystemChrome.setSystemUIOverlayStyle(
+            SystemUiOverlayStyle(
+              statusBarColor: systemUiColor,
+              statusBarIconBrightness: Brightness.dark,
+              systemNavigationBarColor: systemUiColor,
+              systemNavigationBarIconBrightness: Brightness.dark,
+            ),
+          );
+          return true;
+        },
+        child: Dialog(
+          backgroundColor: Colors.transparent,
           child: IntrinsicHeight(
-            child: Container(
-              padding: EdgeInsets.only(top: 35.0),
-              width: double.infinity,
-              // height: 400.0,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // Text section
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 40.0),
-                    child: Text(
-                      "textToShow",
-                      style: TextStyle(fontSize: 12.0, color: Colors.grey[600]),
-                    ),
+            child: Stack(
+              alignment: Alignment.topCenter,
+              children: [
+                Container(
+                  margin: EdgeInsets.only(top: 22.0),
+                  padding: EdgeInsets.only(top: 30.0),
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: dialogColor,
+                    borderRadius: BorderRadius.circular(dialogBorderRadius),
                   ),
-                  SizedBox(height: 10.0),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          SystemChrome.setSystemUIOverlayStyle(
-                            SystemUiOverlayStyle(
-                              statusBarColor: Colors.transparent,
-                              statusBarIconBrightness: Brightness.light,
-                              systemNavigationBarColor: Colors.transparent,
-                              systemNavigationBarIconBrightness:
-                                  Brightness.light,
-                            ),
-                          );
-                          // onDismiss();
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue[800],
-                          padding: EdgeInsets.symmetric(
-                            vertical: 10.0,
-                            horizontal: 20.0,
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 40.0),
+                        child: Text(
+                          title,
+                          maxLines: 2,
+                          style: TextStyle(
+                            fontSize: titleFontSize,
+                            fontFamily: 'Roboto',
+                            fontWeight: titleFontWeight,
+                            color: titleFontColor,
                           ),
                         ),
-                        child: Text("cancelText"),
                       ),
-                      ElevatedButton(
-                        onPressed: () {
-                          SystemChrome.setSystemUIOverlayStyle(
-                            SystemUiOverlayStyle(
-                              statusBarColor: Colors.transparent,
-                              statusBarIconBrightness: Brightness.light,
-                              systemNavigationBarColor: Colors.transparent,
-                              systemNavigationBarIconBrightness:
-                                  Brightness.light,
+                      SizedBox(height: 20.0),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Expanded(
+                            child: IntrinsicHeight(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    top: BorderSide(
+                                      color: borderColor,
+                                      width: borderWidth,
+                                    ),
+                                    right: BorderSide(
+                                      color: borderColor,
+                                      width: borderWidth,
+                                    ),
+                                  ),
+                                ),
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    SystemChrome.setSystemUIOverlayStyle(
+                                      SystemUiOverlayStyle(
+                                        statusBarColor: systemUiColor,
+                                        statusBarIconBrightness:
+                                            Brightness.dark,
+                                        systemNavigationBarColor: systemUiColor,
+                                        systemNavigationBarIconBrightness:
+                                            Brightness.dark,
+                                      ),
+                                    );
+                                    WidgetsBinding.instance
+                                        .addPostFrameCallback((_) {
+                                          if (context.mounted) {
+                                            Navigator.of(context).pop();
+                                            onDismissAction();
+                                          }
+                                        });
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    padding: EdgeInsets.all(0.0),
+                                    backgroundColor: Colors.transparent,
+                                    elevation: 0,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.only(
+                                        bottomLeft: Radius.circular(10.0),
+                                      ),
+                                    ),
+                                    surfaceTintColor: Colors.white,
+                                    shadowColor: Colors.transparent,
+                                  ),
+                                  child: Text(
+                                    title = firstBtnTitle,
+                                    style: TextStyle(
+                                      fontSize: firstBtnSize,
+                                      color: firstBtnColor,
+                                      fontFamily: 'Roboto',
+                                      fontWeight: firstBtnFontWeight,
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ),
-                          );
-                          // onSuccess();
-                          // onDismiss();
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green, // Success button color
-                          padding: EdgeInsets.symmetric(
-                            // vertical: successBtnVerticalPadding,
-                            horizontal: 20.0,
                           ),
-                          textStyle: TextStyle(fontSize: 12.0),
-                        ),
-                        child: Text("btnText"),
+                          Expanded(
+                            child: IntrinsicHeight(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    top: BorderSide(
+                                      color: borderColor,
+                                      width: borderWidth,
+                                    ),
+                                  ),
+                                ),
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    SystemChrome.setSystemUIOverlayStyle(
+                                      SystemUiOverlayStyle(
+                                        statusBarColor: systemUiColor,
+                                        statusBarIconBrightness:
+                                            Brightness.dark,
+                                        systemNavigationBarColor: systemUiColor,
+                                        systemNavigationBarIconBrightness:
+                                            Brightness.dark,
+                                      ),
+                                    );
+                                    WidgetsBinding.instance
+                                        .addPostFrameCallback((_) {
+                                          if (context.mounted) {
+                                            Navigator.of(context).pop();
+                                            onSuccessAction();
+                                          }
+                                        });
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    padding: EdgeInsets.all(0.0),
+                                    backgroundColor: Colors.transparent,
+                                    elevation: 0,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.only(
+                                        bottomLeft: Radius.circular(10.0),
+                                      ),
+                                    ),
+                                    surfaceTintColor: Colors.white,
+                                    shadowColor: Colors.transparent,
+                                  ),
+                                  child: Text(
+                                    title = secondBtnTitle,
+                                    style: TextStyle(
+                                      fontSize: secondBtnSize,
+                                      color: secondBtnColor,
+                                      fontFamily: 'Roboto',
+                                      fontWeight: secondBtnFontWeight,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                  SizedBox(height: 10.0),
-                  // CircleAvatar(
-                  //   backgroundColor: Colors.white,
-                  //   radius: 25.0,
-                  //   child: Image.asset(
-                  //     icon,
-                  //     height: 40.0,
-                  //     width: 40.0,
-                  //     fit: BoxFit.cover,
-                  //   ),
-                  // ),
-                ],
-              ),
+                ),
+                CircleAvatar(
+                  backgroundColor: Colors.white,
+                  radius: 20.0,
+                  child: Image.asset(
+                    iconPath,
+                    height: iconSize,
+                    width: iconSize,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -140,38 +259,3 @@ Future<void> showCustomDialog({required BuildContext context}) async {
     },
   );
 }
-
-/*
-class DialogWithTopIcon extends StatelessWidget {
-  final String title;
-  final String cancelText;
-  final String btnText;
-  final String textToShow;
-  final String icon;
-  final double btnFontSize;
-  final double successBtnVerticalPadding;
-  final Function onDismiss;
-  final Function onSuccess;
-
-  const DialogWithTopIcon({
-    super.key,
-    required this.title,
-    this.cancelText = "No",
-    this.btnText = "OK",
-    required this.textToShow,
-    required this.icon,
-    this.btnFontSize = 18.0,
-    this.successBtnVerticalPadding = 6.0,
-    required this.onDismiss,
-    required this.onSuccess,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      child: ,
-    );
-  }
-}
-*/
