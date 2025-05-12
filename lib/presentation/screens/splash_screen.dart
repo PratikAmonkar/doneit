@@ -1,10 +1,12 @@
 import 'dart:async';
 
+import 'package:DoneIt/presentation/components/Text/text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/constants/app_colors.dart';
+import '../../core/util/app_info_util.dart' show AppInfoUtil;
 import '../components/System Ui/system_ui.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
@@ -16,16 +18,25 @@ class SplashScreen extends ConsumerStatefulWidget {
 
 class _SplashScreenState extends ConsumerState<SplashScreen> {
   Timer? _timer;
+  String packageVersion = "";
 
   @override
   void initState() {
     super.initState();
+    getPackageVersion();
     systemUiConfig(
       statusBarColor: AppColors.lightBackground,
       navigationColor: AppColors.lightBackground,
     );
     _timer = Timer(const Duration(seconds: 3), () {
       GoRouter.of(context).pushReplacement("/main-screen");
+    });
+  }
+
+  void getPackageVersion() async {
+    String version = await AppInfoUtil.getVersion();
+    setState(() {
+      packageVersion = version;
     });
   }
 
@@ -60,6 +71,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                     ],
                   ),
                 ),
+                if (packageVersion.isNotEmpty) ...[
+                  textBold(title: "Version $packageVersion", fontSize: 14.0),
+                ],
               ],
             ),
           ),
