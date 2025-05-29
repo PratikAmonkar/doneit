@@ -13,6 +13,7 @@ import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../core/constants/app_colors.dart';
+import '../../core/service/notification_service.dart';
 import '../components/DateTimePicker/date_time_picker.dart';
 import '../components/System Ui/system_ui.dart';
 import '../components/Text/text.dart';
@@ -40,6 +41,8 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
   final TextEditingController taskNameController = TextEditingController();
   final TextEditingController todoNameController = TextEditingController();
 
+  final notificationService = NotificationService();
+
   @override
   void initState() {
     super.initState();
@@ -55,7 +58,7 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
   void _onCustomPick() async {
     final selected = await pickCustomDateTime(context: context);
 
-    if (selected != null) {
+    /*if (selected != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ref
             .read(addEditScreenProvider.notifier)
@@ -64,7 +67,15 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
               taskId: widget.id ?? "",
             );
       });
-    }
+    }*/
+
+    notificationService.showNotification(
+      title: 'Task Created',
+      body: 'You just added a new task!',
+      notificationId: 1,
+      channelId: 'task_channel',
+      category: 'reminder',
+    );
   }
 
   @override

@@ -7,17 +7,23 @@ plugins {
 
 android {
     namespace = "com.pratik.doneit"
-    compileSdk = flutter.compileSdkVersion
+//    compileSdk = flutter.compileSdkVersion
+    compileSdk = 35
 //    ndkVersion = flutter.ndkVersion
     ndkVersion = "27.0.12077973 "
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        isCoreLibraryDesugaringEnabled = true
+
+        /*   sourceCompatibility = JavaVersion.VERSION_11
+           targetCompatibility = JavaVersion.VERSION_11*/
+
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
 
     defaultConfig {
@@ -29,6 +35,9 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        multiDexEnabled = true
+
     }
     signingConfigs {
         create("release") {
@@ -48,6 +57,16 @@ android {
     }
 }
 
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5") // Use the latest version
+    // Add if your Flutter app crashes on Android 12L or later with desugaring
+    implementation("androidx.window:window:1.4.0")
+    implementation("androidx.window:window-java:1.4.0")
+}
+
 flutter {
     source = "../.."
 }
+
+
+
