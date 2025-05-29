@@ -14,7 +14,7 @@ class DatabaseConfig {
 
     _db = await openDatabase(
       path,
-      version: 2,
+      version: 3,
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
@@ -41,6 +41,9 @@ class DatabaseConfig {
       await db.execute(
         'ALTER TABLE tasks ADD COLUMN total_todos_done INTEGER DEFAULT 0;',
       );
+    }
+    if (oldVersion < 3) {
+      await db.execute('ALTER TABLE tasks ADD COLUMN reminderTime TEXT;');
     }
   }
 

@@ -1,6 +1,5 @@
 import 'package:DoneIt/core/Repository/database_repo_impl.dart';
 import 'package:DoneIt/domain/todo_bean.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/response_status.dart';
@@ -13,6 +12,11 @@ class AddEditScreenProvider {
   final ResponseStatus respUpdateTodoStatus;
   final ResponseStatus respDeleteTodo;
   final ResponseStatus respUpdateTaskTitle;
+  final ResponseStatus respAddReminder;
+
+  final String selectedDateTime;
+  final String priority;
+  final List<String> priorityByList;
 
   AddEditScreenProvider({
     required this.respTodoList,
@@ -21,6 +25,10 @@ class AddEditScreenProvider {
     required this.respUpdateTodoStatus,
     required this.respDeleteTodo,
     required this.respUpdateTaskTitle,
+    required this.priority,
+    required this.priorityByList,
+    required this.respAddReminder,
+    required this.selectedDateTime,
   });
 
   static AddEditScreenProvider get initial => AddEditScreenProvider(
@@ -30,6 +38,10 @@ class AddEditScreenProvider {
     respUpdateTodoStatus: ResponseStatus.onEmpty(),
     respDeleteTodo: ResponseStatus.onEmpty(),
     respUpdateTaskTitle: ResponseStatus.onEmpty(),
+    respAddReminder: ResponseStatus.onEmpty(),
+    priority: "Low",
+    selectedDateTime: "",
+    priorityByList: ["Low", "Medium", "High"],
   );
 
   AddEditScreenProvider copyWith({
@@ -39,6 +51,11 @@ class AddEditScreenProvider {
     ResponseStatus? respUpdateTodoStatus,
     ResponseStatus? respDeleteTodo,
     ResponseStatus? respUpdateTaskTitle,
+    ResponseStatus? respAddReminder,
+    String? selectedDateTime,
+
+    String? priority,
+    List<String>? priorityByList,
   }) {
     return AddEditScreenProvider(
       respTodoList: respTodoList ?? this.respTodoList,
@@ -47,12 +64,21 @@ class AddEditScreenProvider {
       respUpdateTodoStatus: respUpdateTodoStatus ?? this.respUpdateTodoStatus,
       respDeleteTodo: respDeleteTodo ?? this.respDeleteTodo,
       respUpdateTaskTitle: respUpdateTaskTitle ?? this.respUpdateTaskTitle,
+      respAddReminder: respAddReminder ?? this.respAddReminder,
+
+      priority: priority ?? this.priority,
+      priorityByList: priorityByList ?? this.priorityByList,
+      selectedDateTime: selectedDateTime ?? this.selectedDateTime,
     );
   }
 }
 
 class AddEditScreenNotifier extends StateNotifier<AddEditScreenProvider> {
   AddEditScreenNotifier() : super(AddEditScreenProvider.initial);
+
+  void changePriorityBy({required String priorityBy}) {
+    state = state.copyWith(priority: priorityBy);
+  }
 
   void resetTodoListState() {
     state = state.copyWith(respTodoList: ResponseStatus.onEmpty());
@@ -76,6 +102,36 @@ class AddEditScreenNotifier extends StateNotifier<AddEditScreenProvider> {
 
   void resetTaskTitleState() {
     state = state.copyWith(respUpdateTaskTitle: ResponseStatus.onEmpty());
+  }
+
+  void resetReminderState() {
+    state = state.copyWith(respAddReminder: ResponseStatus.onEmpty());
+  }
+
+  void addReminderDateTime({
+    required String taskId,
+    required String reminderDateTime,
+  }) async {
+    state = state.copyWith(respAddReminder: ResponseStatus.onLoading());
+    var response = await DatabaseRepository.updateReminderTime(
+      taskId: taskId,
+      reminderDateTime: reminderDateTime,
+    );
+    if (response.isSuccess) {
+      state = state.copyWith();
+      /* var successState =
+          (response.data as List).map((productJson) {
+            return TodoBean.fromJson(productJson);
+          }).toList();*/
+      state = state.copyWith(
+        selectedDateTime: reminderDateTime,
+        respAddReminder: ResponseStatus.onSuccess(response.data),
+      );
+    } else {
+      state = state.copyWith(
+        respAddReminder: ResponseStatus.onError(response.error),
+      );
+    }
   }
 
   void getTodoList({required String taskId}) async {

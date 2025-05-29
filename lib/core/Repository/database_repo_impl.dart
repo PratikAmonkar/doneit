@@ -275,4 +275,26 @@ class DatabaseRepository {
       );
     }
   }
+
+  static Future<ResponseStatus> updateReminderTime({
+    required String taskId,
+    required String? reminderDateTime,
+  }) async {
+    try {
+      final db = await DatabaseConfig.initializeDb();
+      final now = DateTime.now().toIso8601String();
+
+      await db.update(
+        'tasks',
+        {'reminder_date_time': reminderDateTime, 'updated': now},
+        where: 'id = ?',
+        whereArgs: [taskId],
+      );
+      return ResponseStatus.onSuccess(taskId);
+    } catch (e) {
+      return ResponseStatus.onError(
+        ApiErrorDetails(message: 'Failed to add reminder', statusCode: 500),
+      );
+    }
+  }
 }

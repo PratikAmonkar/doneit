@@ -13,6 +13,7 @@ import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../core/constants/app_colors.dart';
+import '../components/DateTimePicker/date_time_picker.dart';
 import '../components/System Ui/system_ui.dart';
 import '../components/Text/text.dart';
 
@@ -34,6 +35,8 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
 
   List<TodoBean> todosList = [];
 
+  // DateTime? selectedDateTime;
+
   final TextEditingController taskNameController = TextEditingController();
   final TextEditingController todoNameController = TextEditingController();
 
@@ -47,6 +50,21 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
     setState(() {
       taskName = widget.name;
     });
+  }
+
+  void _onCustomPick() async {
+    final selected = await pickCustomDateTime(context: context);
+
+    if (selected != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref
+            .read(addEditScreenProvider.notifier)
+            .addReminderDateTime(
+              reminderDateTime: selected.toIso8601String(),
+              taskId: widget.id ?? "",
+            );
+      });
+    }
   }
 
   @override
@@ -66,6 +84,28 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
           todosList = addEditProvider.respTodoList.data;
         });
       }
+    }
+
+    if (addEditProvider.respAddReminder.isSuccess) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showSnackBarMessage(
+          context: context,
+          primaryTitle: "Reminder added successfully",
+          onCloseAction: () {},
+        );
+        ref.read(addEditScreenProvider.notifier).resetReminderState();
+      });
+    }
+
+    if (addEditProvider.respAddReminder.isError) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showSnackBarMessage(
+          context: context,
+          primaryTitle: "Failed to add reminder",
+          onCloseAction: () {},
+        );
+        ref.read(addEditScreenProvider.notifier).resetReminderState();
+      });
     }
 
     if (addEditProvider.respUpdateTaskTitle.isSuccess) {
@@ -131,16 +171,6 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
 
     if (addEditProvider.respUpdateTodoStatus.isSuccess) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        /*        ref
-            .read(mainScreenProvider.notifier)
-            .updateTodoDoneCount(
-              taskId: widget.id ?? "",
-              todoDoneCount:
-                  todosList
-                      .where((value) => value.isDone == true)
-                      .toList()
-                      .length,
-            );*/
         ref.read(mainScreenProvider.notifier).getTaskList();
         ref.read(addEditScreenProvider.notifier).resetUpdateTodoStatusState();
       });
@@ -272,6 +302,84 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
                       fontSize: 14.0,
                       fontColor: Colors.grey.shade600,
                     ),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Row(
+                          children: [
+                            textMedium(
+                              title: "Reminder",
+                              fontSize: 14.0,
+                              fontColor: Colors.grey.shade600,
+                            ),
+
+                            IconButton(
+                              onPressed: () {
+                                _onCustomPick();
+                              },
+                              icon: Icon(
+                                addEditProvider.selectedDateTime.isNotEmpty
+                                    ? Icons.alarm_on_outlined
+                                    : Icons.alarm_add_rounded,
+                                size: 20.0,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            textMedium(
+                              title: "Priority : ${addEditProvider.priority}",
+                              fontSize: 14.0,
+                              fontColor: Colors.grey.shade600,
+                            ),
+                            PopupMenuButton(
+                              icon: const Icon(
+                                Icons.more_vert,
+                                size: 20.0,
+                                color: Colors.black,
+                              ),
+                              onSelected: (value) {
+                                WidgetsBinding.instance.addPostFrameCallback((
+                                  _,
+                                ) {
+                                  ref
+                                      .read(addEditScreenProvider.notifier)
+                                      .changePriorityBy(priorityBy: value);
+                                  ref
+                                      .read(mainScreenProvider.notifier)
+                                      .resetTaskListState();
+                                });
+                              },
+                              itemBuilder: (BuildContext context) {
+                                return addEditProvider.priorityByList.map((
+                                  String option,
+                                ) {
+                                  return PopupMenuItem(
+                                    value: option,
+                                    child: Text(
+                                      option,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12.0,
+                                        color:
+                                            addEditProvider.priority == option
+                                                ? AppColors.lightPurple200
+                                                : Colors.black,
+                                      ),
+                                    ),
+                                  );
+                                }).toList();
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+
                     Align(
                       alignment: Alignment.center,
                       child: GestureDetector(
