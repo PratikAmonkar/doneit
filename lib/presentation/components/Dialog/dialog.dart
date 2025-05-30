@@ -107,6 +107,7 @@ Future<void> showCustomDialog({
                         padding: EdgeInsets.symmetric(horizontal: 40.0),
                         child: Text(
                           title,
+                          textAlign: TextAlign.center,
                           maxLines: 2,
                           style: TextStyle(
                             fontSize: titleFontSize,

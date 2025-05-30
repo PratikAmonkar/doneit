@@ -55,19 +55,16 @@ class NotificationService {
     required int notificationId,
     required String channelId,
     required String category,
-    required String scheduleDateTime,
-    String iconName = "logo_no_title",
+    required DateTime scheduleDateTime,
+    String iconName = "app_logo",
     Importance importance = Importance.high,
-    Priority priority = Priority.high,
+    Priority priority = Priority.defaultPriority,
   }) async {
-    final scheduledTime = tz.TZDateTime.from(
-      // CommonUtils().getDateTimeFromIso(date: scheduleDateTime),
-      DateTime.now().add(const Duration(minutes: 10)),
-      tz.local,
-    );
+    final time = tz.TZDateTime.from(scheduleDateTime, tz.local);
+
     final now = tz.TZDateTime.now(tz.local);
 
-    if (scheduledTime.isBefore(now)) {
+    if (time.isBefore(now)) {
       return;
     }
 
@@ -88,9 +85,9 @@ class NotificationService {
       notificationId,
       title,
       body,
-      scheduledTime,
+      time,
       notificationDetails,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.alarmClock,
       /*      uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,*/
     );
@@ -102,5 +99,12 @@ class NotificationService {
 
   Future<void> cancelAllNotifications() async {
     await _flutterLocalNotificationsPlugin.cancelAll();
+  }
+
+  Future<bool> isNotificationScheduled(int notificationId) async {
+    final List<PendingNotificationRequest> pending =
+        await _flutterLocalNotificationsPlugin.pendingNotificationRequests();
+
+    return pending.any((notification) => notification.id == notificationId);
   }
 }

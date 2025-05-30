@@ -10,19 +10,28 @@ import 'package:DoneIt/presentation/components/TextField/textField.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/service/notification_service.dart';
+import '../../core/service/permission_service.dart';
 import '../components/DateTimePicker/date_time_picker.dart';
+import '../components/Dialog/dialog.dart';
 import '../components/System Ui/system_ui.dart';
 import '../components/Text/text.dart';
 
 class AddEditScreen extends ConsumerStatefulWidget {
   final String? id;
   final String name;
+  final int? notificationId;
 
-  const AddEditScreen({super.key, required this.id, required this.name});
+  const AddEditScreen({
+    super.key,
+    required this.id,
+    required this.name,
+    this.notificationId,
+  });
 
   @override
   ConsumerState<AddEditScreen> createState() => _AddEditScreenState();
@@ -42,6 +51,9 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
   final TextEditingController todoNameController = TextEditingController();
 
   final notificationService = NotificationService();
+  final permissionService = PermissionService();
+
+  bool isReminderAdd = false;
 
   @override
   void initState() {
@@ -52,30 +64,155 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
     );
     setState(() {
       taskName = widget.name;
+      isReminderAdd = widget.notificationId != null;
     });
   }
 
-  void _onCustomPick() async {
-    final selected = await pickCustomDateTime(context: context);
+  /*  Future<void> checkAndRequestNotificationPermission(
+    BuildContext context, {
+    bool isUpdate = false,
+  }) async
+  {
+    final status = await permissionService.requestPermission(
+      Permission.notification,
+    );
+    debugPrint("Status = $status");
+    if (status.isGranted) {
+      debugPrint("Notification permission granted");
+      _onCustomPick(isUpdate: isUpdate);
+    } else if (status.isDenied) {
+      debugPrint("else if");
+      final shouldShowRationale = await permissionService
+          .shouldShowRequestRationale(Permission.notification);
 
-    /*if (selected != null) {
+      if (shouldShowRationale) {
+        debugPrint("Test 1");
+        if (context.mounted) {
+          await permissionService.relationalDialog(context, () {
+            checkAndRequestNotificationPermission(context, isUpdate: isUpdate);
+          });
+        }
+      } else {
+        debugPrint("Test 2");
+        await permissionService.openAppSetting();
+      }
+    } else {
+      debugPrint("else");
+      if (context.mounted) {
+        showCustomDialog(
+          context: context,
+          title:
+              "Notification permission is currently disabled. Please go to settings to enable it and receive task reminders.",
+          systemUiColor: AppColors.lightBackground,
+          onSuccessAction: () async {
+            await permissionService.openAppSetting();
+          },
+          onDismissAction: () {},
+        );
+      }
+    }
+  }*/
+
+  Future<void> checkAndRequestPermissions(
+    BuildContext context, {
+    bool isUpdate = false,
+    List<Permission> permissions = const [
+      Permission.notification,
+      Permission.scheduleExactAlarm,
+    ],
+  }) async {
+    final Map<Permission, PermissionStatus> statuses = await permissionService
+        .requestMultiplePermission(permissions);
+
+    bool allGranted = statuses.values.every((status) => status.isGranted);
+
+    if (allGranted) {
+      debugPrint("All permissions granted");
+      _onCustomPick(isUpdate: isUpdate);
+      return;
+    }
+
+    for (final permission in permissions) {
+      final status = statuses[permission];
+
+      if (status == PermissionStatus.denied) {
+        final shouldShowRationale = await permissionService
+            .shouldShowRequestRationale(permission);
+
+        if (shouldShowRationale) {
+          debugPrint("Rationale required for $permission");
+          if (context.mounted) {
+            await permissionService.relationalDialog(context, () {
+              checkAndRequestPermissions(
+                context,
+                isUpdate: isUpdate,
+                permissions: permissions,
+              );
+            });
+          }
+        } else {
+          debugPrint("Permission $permission permanently denied");
+          await permissionService.openAppSetting();
+        }
+
+        return; // Exit early if any permission needs action
+      }
+
+      if (status == PermissionStatus.permanentlyDenied) {
+        if (context.mounted) {
+          showCustomDialog(
+            context: context,
+            title:
+                "Some required permissions are disabled. Please go to settings to enable them.",
+            systemUiColor: AppColors.lightBackground,
+            onSuccessAction: () async {
+              await permissionService.openAppSetting();
+            },
+            onDismissAction: () {},
+          );
+        }
+        return;
+      }
+    }
+  }
+
+  void _onCustomPick({bool isUpdate = false}) async {
+    final selected = await pickCustomDateTime(context: context);
+    final int notificationId = (Uuid().v4().hashCode & 0x7fffffff);
+
+    if (isUpdate) {
+      await notificationService.cancelNotification(widget.notificationId ?? 0);
+    }
+    notificationService.scheduleNotification(
+      title: 'Heads up! Your task is due: $taskName',
+      body: 'Let\'s work on those to-dos for it!',
+      notificationId: notificationId,
+      //hashCode may return a negative number. You can wrap it to make it positive:
+      channelId: 'task_channel',
+      category: 'reminder',
+      scheduleDateTime: selected ?? DateTime.now().add(Duration(seconds: 10)),
+    );
+
+    if (selected != null &&
+        await notificationService.isNotificationScheduled(notificationId)) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ref
             .read(addEditScreenProvider.notifier)
-            .addReminderDateTime(
+            .addNotificationData(
               reminderDateTime: selected.toIso8601String(),
               taskId: widget.id ?? "",
+              notificationId: notificationId,
             );
       });
-    }*/
-
-    notificationService.showNotification(
-      title: 'Task Created',
-      body: 'You just added a new task!',
-      notificationId: 1,
-      channelId: 'task_channel',
-      category: 'reminder',
-    );
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showSnackBarMessage(
+          context: context,
+          primaryTitle: "Unable to set reminder",
+          onCloseAction: () {},
+        );
+      });
+    }
   }
 
   @override
@@ -104,6 +241,10 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
           primaryTitle: "Reminder added successfully",
           onCloseAction: () {},
         );
+        setState(() {
+          isReminderAdd = true;
+        });
+        ref.read(mainScreenProvider.notifier).getTaskList();
         ref.read(addEditScreenProvider.notifier).resetReminderState();
       });
     }
@@ -224,6 +365,24 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
       });
     }
 
+    if (addEditProvider.respAddPriority.isSuccess) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(mainScreenProvider.notifier).getTaskList();
+        ref.read(addEditScreenProvider.notifier).resetReminderState();
+      });
+    }
+
+    if (addEditProvider.respAddPriority.isError) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showSnackBarMessage(
+          context: context,
+          primaryTitle: "Failed to set priority",
+          onCloseAction: () {},
+        );
+        ref.read(addEditScreenProvider.notifier).resetReminderState();
+      });
+    }
+
     return WillPopScope(
       onWillPop: () async {
         systemUiConfig(
@@ -325,13 +484,28 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
                               fontSize: 14.0,
                               fontColor: Colors.grey.shade600,
                             ),
-
                             IconButton(
                               onPressed: () {
-                                _onCustomPick();
+                                if (isReminderAdd) {
+                                  showCustomDialog(
+                                    context: context,
+                                    title:
+                                        "A reminder already exists. Do you want to change it?",
+                                    systemUiColor: AppColors.lightBackground,
+                                    onSuccessAction: () {
+                                      checkAndRequestPermissions(
+                                        context,
+                                        isUpdate: true,
+                                      );
+                                    },
+                                    onDismissAction: () {},
+                                  );
+                                } else {
+                                  checkAndRequestPermissions(context);
+                                }
                               },
                               icon: Icon(
-                                addEditProvider.selectedDateTime.isNotEmpty
+                                isReminderAdd
                                     ? Icons.alarm_on_outlined
                                     : Icons.alarm_add_rounded,
                                 size: 20.0,
@@ -359,7 +533,10 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
                                 ) {
                                   ref
                                       .read(addEditScreenProvider.notifier)
-                                      .changePriorityBy(priorityBy: value);
+                                      .addTaskPriority(
+                                        priorityBy: value,
+                                        taskId: widget.id ?? "",
+                                      );
                                   ref
                                       .read(mainScreenProvider.notifier)
                                       .resetTaskListState();

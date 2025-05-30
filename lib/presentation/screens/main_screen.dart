@@ -6,8 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../core/constants/app_colors.dart';
+import '../../core/service/permission_service.dart';
 import '../../core/util/common_util.dart';
 import '../components/CheckBox/checkbox.dart';
 import '../components/Dialog/dialog.dart';
@@ -23,6 +25,7 @@ class MainScreen extends ConsumerStatefulWidget {
 
 class _MainScreenState extends ConsumerState<MainScreen> {
   final ScrollController _scrollController = ScrollController();
+  final permissionService = PermissionService();
 
   bool _showFab = true;
   bool _showAppBar = true;
@@ -31,7 +34,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   List<TaskBean> deleteTaskList = [];
 
-  bool showDialog = true;
 
   @override
   void initState() {
@@ -99,14 +101,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       });
     }
 
-    void toggleDialog() {
-      setState(() {
-        showDialog = !showDialog;
-      });
-    }
-
-    debugPrint("Dialog = $showDialog");
-
     return WillPopScope(
       onWillPop: () async {
         systemUiConfig();
@@ -125,7 +119,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
               child: FloatingActionButton(
                 backgroundColor: AppColors.lightPurple200,
                 onPressed: () {
-                  GoRouter.of(context).push("/add-edit-screen/0/a");
+                  setState(() {
+                    showCheckBox = false;
+                    deleteTaskList = [];
+                  });
+                  GoRouter.of(context).push("/add-edit-screen/0/a/-1");
                 },
                 child: const Icon(
                   Icons.add,
@@ -193,7 +191,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                                                     });
                                                   });
                                             },
-                                            onDismissAction: () {},
+                                            onDismissAction: () {
+                                              setState(() {
+                                                deleteTaskList = [];
+                                              });
+                                            },
                                           );
                                         }
                                         setState(() {
@@ -327,15 +329,14 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                                           final TaskBean taskBean =
                                               (mainProvider.respTaskList.data ??
                                                   List.empty())[index];
-
-                                          debugPrint(
-                                            "Task bean = ${taskBean.toJson()}",
-                                          );
-
                                           return GestureDetector(
                                             onTap: () {
+                                              setState(() {
+                                                showCheckBox = false;
+                                                deleteTaskList = [];
+                                              });
                                               GoRouter.of(context).push(
-                                                "/add-edit-screen/${taskBean.id}/${taskBean.title}",
+                                                "/add-edit-screen/${taskBean.id}/${taskBean.title}/${taskBean.notificationId}",
                                               );
                                             },
                                             child: Container(

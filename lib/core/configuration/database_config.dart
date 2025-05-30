@@ -14,7 +14,7 @@ class DatabaseConfig {
 
     _db = await openDatabase(
       path,
-      version: 3,
+      version: 4,
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
@@ -44,6 +44,9 @@ class DatabaseConfig {
     }
     if (oldVersion < 3) {
       await db.execute('ALTER TABLE tasks ADD COLUMN reminderTime TEXT;');
+    }
+    if (oldVersion < 4) {
+      await db.execute('ALTER TABLE tasks ADD COLUMN notification_id TEXT;');
     }
   }
 

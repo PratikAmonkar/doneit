@@ -13,8 +13,8 @@ class AddEditScreenProvider {
   final ResponseStatus respDeleteTodo;
   final ResponseStatus respUpdateTaskTitle;
   final ResponseStatus respAddReminder;
+  final ResponseStatus respAddPriority;
 
-  final String selectedDateTime;
   final String priority;
   final List<String> priorityByList;
 
@@ -28,7 +28,7 @@ class AddEditScreenProvider {
     required this.priority,
     required this.priorityByList,
     required this.respAddReminder,
-    required this.selectedDateTime,
+    required this.respAddPriority,
   });
 
   static AddEditScreenProvider get initial => AddEditScreenProvider(
@@ -39,8 +39,8 @@ class AddEditScreenProvider {
     respDeleteTodo: ResponseStatus.onEmpty(),
     respUpdateTaskTitle: ResponseStatus.onEmpty(),
     respAddReminder: ResponseStatus.onEmpty(),
+    respAddPriority: ResponseStatus.onEmpty(),
     priority: "Low",
-    selectedDateTime: "",
     priorityByList: ["Low", "Medium", "High"],
   );
 
@@ -52,6 +52,7 @@ class AddEditScreenProvider {
     ResponseStatus? respDeleteTodo,
     ResponseStatus? respUpdateTaskTitle,
     ResponseStatus? respAddReminder,
+    ResponseStatus? respAddPriority,
     String? selectedDateTime,
 
     String? priority,
@@ -68,7 +69,7 @@ class AddEditScreenProvider {
 
       priority: priority ?? this.priority,
       priorityByList: priorityByList ?? this.priorityByList,
-      selectedDateTime: selectedDateTime ?? this.selectedDateTime,
+      respAddPriority: respAddPriority ?? this.respAddPriority,
     );
   }
 }
@@ -76,8 +77,8 @@ class AddEditScreenProvider {
 class AddEditScreenNotifier extends StateNotifier<AddEditScreenProvider> {
   AddEditScreenNotifier() : super(AddEditScreenProvider.initial);
 
-  void changePriorityBy({required String priorityBy}) {
-    state = state.copyWith(priority: priorityBy);
+  void resetAddPriority() {
+    state = state.copyWith(respAddPriority: ResponseStatus.onEmpty());
   }
 
   void resetTodoListState() {
@@ -108,21 +109,39 @@ class AddEditScreenNotifier extends StateNotifier<AddEditScreenProvider> {
     state = state.copyWith(respAddReminder: ResponseStatus.onEmpty());
   }
 
-  void addReminderDateTime({
+  void addTaskPriority({
     required String taskId,
-    required String reminderDateTime,
+    required String priorityBy,
   }) async {
-    state = state.copyWith(respAddReminder: ResponseStatus.onLoading());
-    var response = await DatabaseRepository.updateReminderTime(
+    state = state.copyWith(respAddPriority: ResponseStatus.onLoading());
+    var response = await DatabaseRepository.setTaskPriority(
       taskId: taskId,
-      reminderDateTime: reminderDateTime,
+      priority: priorityBy,
     );
     if (response.isSuccess) {
-      state = state.copyWith();
-      /* var successState =
-          (response.data as List).map((productJson) {
-            return TodoBean.fromJson(productJson);
-          }).toList();*/
+      state = state.copyWith(
+        priority: priorityBy,
+        respAddPriority: ResponseStatus.onSuccess(response.data),
+      );
+    } else {
+      state = state.copyWith(
+        respAddPriority: ResponseStatus.onError(response.error),
+      );
+    }
+  }
+
+  void addNotificationData({
+    required String taskId,
+    required String reminderDateTime,
+    required int notificationId,
+  }) async {
+    state = state.copyWith(respAddReminder: ResponseStatus.onLoading());
+    var response = await DatabaseRepository.addNotificationData(
+      taskId: taskId,
+      reminderDateTime: reminderDateTime,
+      notificationId: notificationId,
+    );
+    if (response.isSuccess) {
       state = state.copyWith(
         selectedDateTime: reminderDateTime,
         respAddReminder: ResponseStatus.onSuccess(response.data),

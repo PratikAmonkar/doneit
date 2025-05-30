@@ -6,6 +6,7 @@ class TaskBean {
   final String? updated;
   final int? todosDoneCount;
   final int? totalTodosCount;
+  final String? notificationId;
 
   TaskBean({
     required this.id,
@@ -15,6 +16,7 @@ class TaskBean {
     this.updated,
     this.todosDoneCount,
     this.totalTodosCount,
+    this.notificationId,
   });
 
   TaskBean copyWith({
@@ -25,6 +27,7 @@ class TaskBean {
     String? updated,
     int? todosDoneCount,
     int? totalTodosCount,
+    String? notificationId,
   }) {
     return TaskBean(
       id: id ?? this.id,
@@ -34,6 +37,7 @@ class TaskBean {
       updated: updated ?? this.updated,
       todosDoneCount: todosDoneCount ?? this.todosDoneCount,
       totalTodosCount: totalTodosCount ?? this.totalTodosCount,
+      notificationId: notificationId ?? this.notificationId,
     );
   }
 
@@ -46,6 +50,7 @@ class TaskBean {
       updated: json['updated'] as String?,
       todosDoneCount: json['total_todos_done'] ?? 0,
       totalTodosCount: json['total_todos_count'] ?? 0,
+      notificationId: json['notification_id'] ?? "-1",
     );
   }
 
@@ -58,6 +63,7 @@ class TaskBean {
       'updated': updated,
       'total_todos_done': todosDoneCount,
       'total_todos_count': totalTodosCount,
+      'notification_id': notificationId,
     };
   }
 }

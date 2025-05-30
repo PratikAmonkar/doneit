@@ -276,9 +276,10 @@ class DatabaseRepository {
     }
   }
 
-  static Future<ResponseStatus> updateReminderTime({
+  static Future<ResponseStatus> addNotificationData({
     required String taskId,
     required String? reminderDateTime,
+    required int? notificationId,
   }) async {
     try {
       final db = await DatabaseConfig.initializeDb();
@@ -286,7 +287,11 @@ class DatabaseRepository {
 
       await db.update(
         'tasks',
-        {'reminder_date_time': reminderDateTime, 'updated': now},
+        {
+          'reminder_date_time': reminderDateTime,
+          'updated': now,
+          'notification_id': notificationId,
+        },
         where: 'id = ?',
         whereArgs: [taskId],
       );
@@ -294,6 +299,28 @@ class DatabaseRepository {
     } catch (e) {
       return ResponseStatus.onError(
         ApiErrorDetails(message: 'Failed to add reminder', statusCode: 500),
+      );
+    }
+  }
+
+  static Future<ResponseStatus> setTaskPriority({
+    required String taskId,
+    required String priority,
+  }) async {
+    try {
+      final db = await DatabaseConfig.initializeDb();
+      final now = DateTime.now().toIso8601String();
+
+      await db.update(
+        'tasks',
+        {'updated': now, 'priority': priority},
+        where: 'id = ?',
+        whereArgs: [taskId],
+      );
+      return ResponseStatus.onSuccess(taskId);
+    } catch (e) {
+      return ResponseStatus.onError(
+        ApiErrorDetails(message: 'Failed to add priority', statusCode: 500),
       );
     }
   }
