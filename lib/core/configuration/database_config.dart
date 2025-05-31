@@ -14,22 +14,22 @@ class DatabaseConfig {
 
     _db = await openDatabase(
       path,
-      version: 4,
+      version: 1,
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
       onCreate: (Database db, int version) async {
         await _createTables(db);
       },
-      onUpgrade: (Database db, int oldVersion, int newVersion) async {
+ /*     onUpgrade: (Database db, int oldVersion, int newVersion) async {
         await _migrateDb(db, oldVersion, newVersion);
-      },
+      },*/
     );
 
     return _db!;
   }
 
-  static Future<void> _migrateDb(
+/*  static Future<void> _migrateDb(
     Database db,
     int oldVersion,
     int newVersion,
@@ -48,7 +48,7 @@ class DatabaseConfig {
     if (oldVersion < 4) {
       await db.execute('ALTER TABLE tasks ADD COLUMN notification_id TEXT;');
     }
-  }
+  }*/
 
   static Future<void> _createTables(Database db) async {
     await db.execute("""
@@ -56,6 +56,10 @@ class DatabaseConfig {
         id TEXT PRIMARY KEY,
         title TEXT,
         priority TEXT,
+        total_todos_count INTEGER DEFAULT 0,
+        total_todos_done INTEGER DEFAULT 0,
+        reminder_date_time TEXT,
+        notification_id TEXT,
         created TEXT,
         updated TEXT
       );
