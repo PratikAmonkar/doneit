@@ -183,35 +183,36 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
     if (isUpdate) {
       await notificationService.cancelNotification(widget.notificationId ?? 0);
     }
-    notificationService.scheduleNotification(
-      title: 'Heads up! Your task is due: $taskName',
-      body: 'Let\'s work on those to-dos for it!',
-      notificationId: notificationId,
-      //hashCode may return a negative number. You can wrap it to make it positive:
-      channelId: 'task_channel',
-      category: 'reminder',
-      scheduleDateTime: selected ?? DateTime.now().add(Duration(seconds: 10)),
-    );
 
-    if (selected != null &&
-        await notificationService.isNotificationScheduled(notificationId)) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref
-            .read(addEditScreenProvider.notifier)
-            .addNotificationData(
-              reminderDateTime: selected.toIso8601String(),
-              taskId: widget.id ?? "",
-              notificationId: notificationId,
-            );
-      });
-    } else {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        showSnackBarMessage(
-          context: context,
-          primaryTitle: "Unable to set reminder",
-          onCloseAction: () {},
-        );
-      });
+    if (selected != null) {
+      notificationService.scheduleNotification(
+        title: 'Heads up! Your task is due: $taskName',
+        body: 'Let\'s work on those to-dos for it!',
+        notificationId: notificationId,
+        //hashCode may return a negative number. You can wrap it to make it positive:
+        channelId: 'task_channel',
+        category: 'reminder',
+        scheduleDateTime: selected,
+      );
+      if (await notificationService.isNotificationScheduled(notificationId)) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ref
+              .read(addEditScreenProvider.notifier)
+              .addNotificationData(
+                reminderDateTime: selected.toIso8601String(),
+                taskId: widget.id ?? "",
+                notificationId: notificationId,
+              );
+        });
+      } else {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          showSnackBarMessage(
+            context: context,
+            primaryTitle: "Unable to set reminder",
+            onCloseAction: () {},
+          );
+        });
+      }
     }
   }
 
