@@ -77,6 +77,10 @@ class AddEditScreenProvider {
 class AddEditScreenNotifier extends StateNotifier<AddEditScreenProvider> {
   AddEditScreenNotifier() : super(AddEditScreenProvider.initial);
 
+  void setPriorityBy(String priorityBy){
+    state = state.copyWith(priority: priorityBy);
+  }
+
   void resetAddPriority() {
     state = state.copyWith(respAddPriority: ResponseStatus.onEmpty());
   }

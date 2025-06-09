@@ -21,11 +21,29 @@ class DatabaseRepository {
     }
   }
 
-  static Future<ResponseStatus> getAllTasks({required String sortBy}) async {
+  static String _getPriorityFilterClause(String priority) {
+    if (priority == "High") {
+      return "tasks.priority = 'High'";
+    } else if (priority == "Medium") {
+      return "tasks.priority = 'Medium'";
+    } else if (priority == "Low") {
+      return "tasks.priority = 'Low'";
+    }
+    return "";
+  }
+
+  static Future<ResponseStatus> getAllTasks({
+    required String sortBy,
+    required String priorityBy,
+  }) async {
     try {
       final db = await DatabaseConfig.initializeDb();
 
       final orderByClause = _getOrderByClause(sortBy);
+      final priorityOrderClause = _getPriorityFilterClause(priorityBy);
+
+      final whereClause =
+          priorityOrderClause.isNotEmpty ? "WHERE $priorityOrderClause" : "";
 
       final result = await db.rawQuery('''
           SELECT 
@@ -34,8 +52,10 @@ class DatabaseRepository {
             COUNT(todos.id) AS totalTodosCount
           FROM tasks
           LEFT JOIN todos ON tasks.id = todos.task_id
+          $whereClause
           GROUP BY tasks.id
           ORDER BY $orderByClause;
+          
         ''');
       return ResponseStatus.onSuccess(result);
     } catch (e) {

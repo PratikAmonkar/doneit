@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/service/permission_service.dart';
@@ -33,7 +32,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   bool showCheckBox = false;
 
   List<TaskBean> deleteTaskList = [];
-
 
   @override
   void initState() {
@@ -123,7 +121,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                     showCheckBox = false;
                     deleteTaskList = [];
                   });
-                  GoRouter.of(context).push("/add-edit-screen/0/a/-1");
+                  GoRouter.of(context).push("/add-edit-screen/0/a/-1/a");
                 },
                 child: const Icon(
                   Icons.add,
@@ -253,7 +251,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                                               textBold(
                                                 title:
                                                     "Sort by : ${mainProvider.sortBy}",
-                                                fontSize: 14.0,
+                                                fontSize: 12.0,
                                               ),
                                               PopupMenuButton(
                                                 icon: const Icon(
@@ -311,6 +309,69 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                                               ),
                                             ],
                                           ),
+                                          Row(
+                                            children: [
+                                              textBold(
+                                                title:
+                                                    "Priority by : ${mainProvider.priorityBy}",
+                                                fontSize: 12.0,
+                                              ),
+                                              PopupMenuButton(
+                                                icon: const Icon(
+                                                  Icons.more_vert,
+                                                  size: 20.0,
+                                                  color: Colors.black,
+                                                ),
+                                                onSelected: (value) {
+                                                  WidgetsBinding.instance
+                                                      .addPostFrameCallback((
+                                                        _,
+                                                      ) {
+                                                        ref
+                                                            .read(
+                                                              mainScreenProvider
+                                                                  .notifier,
+                                                            )
+                                                            .changePriorityBy(
+                                                              priorityBy: value,
+                                                            );
+                                                        ref
+                                                            .read(
+                                                              mainScreenProvider
+                                                                  .notifier,
+                                                            )
+                                                            .resetTaskListState();
+                                                      });
+                                                },
+                                                itemBuilder: (
+                                                  BuildContext context,
+                                                ) {
+                                                  return mainProvider.priorityByList.map((
+                                                    String option,
+                                                  ) {
+                                                    return PopupMenuItem(
+                                                      value: option,
+                                                      child: Text(
+                                                        option,
+                                                        style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontSize: 12.0,
+                                                          color:
+                                                              mainProvider.sortBy ==
+                                                                      option
+                                                                  ? AppColors
+                                                                      .lightPurple200
+                                                                  : Colors
+                                                                      .black,
+                                                        ),
+                                                      ),
+                                                    );
+                                                  }).toList();
+                                                },
+                                              ),
+                                            ],
+                                          ),
                                         ],
                                       ),
                                       verticalSpacer(value: 10.0),
@@ -336,7 +397,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                                                 deleteTaskList = [];
                                               });
                                               GoRouter.of(context).push(
-                                                "/add-edit-screen/${taskBean.id}/${taskBean.title}/${taskBean.notificationId}",
+                                                "/add-edit-screen/${taskBean.id}/${taskBean.title}/${taskBean.notificationId}/${taskBean.priority}",
                                               );
                                             },
                                             child: Container(
@@ -404,14 +465,54 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                                                               "Completed ${taskBean.todosDoneCount} out of ${taskBean.totalTodosCount}",
                                                           fontSize: 10.0,
                                                         ),
-                                                        textMedium(
-                                                          title:
-                                                              "${taskBean.updated != null ? "Last updated :" : "created :"} ${taskBean.updated != null ? CommonUtil().getDate(option: 1, value: taskBean.updated ?? "") : CommonUtil().getDate(option: 1, value: taskBean.created)}",
-                                                          fontSize: 10.0,
-                                                          fontColor:
-                                                              Colors
-                                                                  .grey
-                                                                  .shade900,
+                                                        Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceBetween,
+                                                          children: [
+                                                            textMedium(
+                                                              title:
+                                                                  "${taskBean.updated != null ? "Last updated :" : "created :"} ${taskBean.updated != null ? CommonUtil().getDate(option: 1, value: taskBean.updated ?? "") : CommonUtil().getDate(option: 1, value: taskBean.created)}",
+                                                              fontSize: 10.0,
+                                                              fontColor:
+                                                                  Colors
+                                                                      .grey
+                                                                      .shade900,
+                                                            ),
+                                                            if (taskBean
+                                                                    .priority !=
+                                                                null) ...[
+                                                              Container(
+                                                                padding:
+                                                                    EdgeInsets.symmetric(
+                                                                      horizontal:
+                                                                          8.0,
+                                                                      vertical:
+                                                                          2.0,
+                                                                    ),
+                                                                decoration: BoxDecoration(
+                                                                  color: CommonUtil()
+                                                                      .getPriorityColor(
+                                                                        priority:
+                                                                            taskBean.priority!,
+                                                                      ),
+                                                                  borderRadius:
+                                                                      BorderRadius.circular(
+                                                                        10.0,
+                                                                      ),
+                                                                ),
+                                                                child: textMedium(
+                                                                  title:
+                                                                      taskBean
+                                                                          .priority!,
+                                                                  fontSize: 8.0,
+                                                                  fontColor:
+                                                                      AppColors
+                                                                          .white1,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ],
                                                         ),
                                                       ],
                                                     ),

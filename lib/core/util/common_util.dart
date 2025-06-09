@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class CommonUtil {
@@ -26,6 +27,16 @@ class CommonUtil {
       return "Good Evening";
     } else {
       return "";
+    }
+  }
+
+  Color getPriorityColor({required String priority}) {
+    if (priority == 'Low') {
+      return Colors.green;
+    } else if (priority == "Medium") {
+      return Colors.orange;
+    } else {
+      return Colors.red;
     }
   }
 }

@@ -25,12 +25,14 @@ class AddEditScreen extends ConsumerStatefulWidget {
   final String? id;
   final String name;
   final int? notificationId;
+  final String? priorityBy;
 
   const AddEditScreen({
     super.key,
     required this.id,
     required this.name,
     this.notificationId,
+    this.priorityBy,
   });
 
   @override
@@ -66,52 +68,12 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
       taskName = widget.name;
       isReminderAdd = widget.notificationId != null;
     });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref
+          .read(addEditScreenProvider.notifier)
+          .setPriorityBy(widget.priorityBy ?? "None");
+    });
   }
-
-  /*  Future<void> checkAndRequestNotificationPermission(
-    BuildContext context, {
-    bool isUpdate = false,
-  }) async
-  {
-    final status = await permissionService.requestPermission(
-      Permission.notification,
-    );
-    debugPrint("Status = $status");
-    if (status.isGranted) {
-      debugPrint("Notification permission granted");
-      _onCustomPick(isUpdate: isUpdate);
-    } else if (status.isDenied) {
-      debugPrint("else if");
-      final shouldShowRationale = await permissionService
-          .shouldShowRequestRationale(Permission.notification);
-
-      if (shouldShowRationale) {
-        debugPrint("Test 1");
-        if (context.mounted) {
-          await permissionService.relationalDialog(context, () {
-            checkAndRequestNotificationPermission(context, isUpdate: isUpdate);
-          });
-        }
-      } else {
-        debugPrint("Test 2");
-        await permissionService.openAppSetting();
-      }
-    } else {
-      debugPrint("else");
-      if (context.mounted) {
-        showCustomDialog(
-          context: context,
-          title:
-              "Notification permission is currently disabled. Please go to settings to enable it and receive task reminders.",
-          systemUiColor: AppColors.lightBackground,
-          onSuccessAction: () async {
-            await permissionService.openAppSetting();
-          },
-          onDismissAction: () {},
-        );
-      }
-    }
-  }*/
 
   Future<void> checkAndRequestPermissions(
     BuildContext context, {

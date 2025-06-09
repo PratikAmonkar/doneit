@@ -9,13 +9,17 @@ class MainScreenProvider {
   final ResponseStatus respTaskList;
   final ResponseStatus respDeleteTask;
   final String sortBy;
+  final String priorityBy;
   final List<String> sortByList;
+  final List<String> priorityByList;
 
   MainScreenProvider({
     required this.respTaskList,
     required this.respDeleteTask,
     required this.sortBy,
+    required this.priorityBy,
     required this.sortByList,
+    required this.priorityByList,
   });
 
   static MainScreenProvider get initial => MainScreenProvider(
@@ -23,6 +27,8 @@ class MainScreenProvider {
     respDeleteTask: ResponseStatus.onEmpty(),
     sortBy: "Created",
     sortByList: ["Name", "Created", "Updated", "Completed"],
+    priorityBy: "None",
+    priorityByList: ["None", "Low", "Medium", "High"],
   );
 
   MainScreenProvider copyWith({
@@ -30,12 +36,16 @@ class MainScreenProvider {
     ResponseStatus? respDeleteTask,
     String? sortBy,
     List<String>? sortByList,
+    String? priorityBy,
+    List<String>? priorityByList,
   }) {
     return MainScreenProvider(
       respTaskList: respTaskList ?? this.respTaskList,
       respDeleteTask: respDeleteTask ?? this.respDeleteTask,
       sortBy: sortBy ?? this.sortBy,
       sortByList: sortByList ?? this.sortByList,
+      priorityBy: priorityBy ?? this.priorityBy,
+      priorityByList: priorityByList ?? this.priorityByList,
     );
   }
 }
@@ -45,6 +55,10 @@ class MainScreenNotifier extends StateNotifier<MainScreenProvider> {
 
   void changeSortBy({required String sortBy}) {
     state = state.copyWith(sortBy: sortBy);
+  }
+
+  void changePriorityBy({required String priorityBy}) {
+    state = state.copyWith(priorityBy: priorityBy);
   }
 
   void resetTaskListState() {
@@ -57,7 +71,10 @@ class MainScreenNotifier extends StateNotifier<MainScreenProvider> {
 
   void getTaskList() async {
     state = state.copyWith(respTaskList: ResponseStatus.onLoading());
-    var response = await DatabaseRepository.getAllTasks(sortBy: state.sortBy);
+    var response = await DatabaseRepository.getAllTasks(
+      sortBy: state.sortBy,
+      priorityBy: state.priorityBy,
+    );
     if (response.isSuccess) {
       var successState =
           (response.data as List).map((productJson) {
@@ -83,7 +100,7 @@ class MainScreenNotifier extends StateNotifier<MainScreenProvider> {
 
     state = state.copyWith(
       respTaskList: ResponseStatus.onSuccess(
-        getSortedTasks(updatedTaskList, state.sortBy),
+        getSortedTasks(updatedTaskList, state.sortBy, state.priorityBy),
       ),
     );
   }
@@ -112,7 +129,11 @@ class MainScreenNotifier extends StateNotifier<MainScreenProvider> {
     }
   }
 
-  List<TaskBean> getSortedTasks(List<TaskBean> tasks, String sortBy) {
+  List<TaskBean> getSortedTasks(
+    List<TaskBean> tasks,
+    String sortBy,
+    String priorityBy,
+  ) {
     final sortedList = List<TaskBean>.from(tasks);
 
     switch (sortBy) {
