@@ -47,8 +47,6 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
 
   List<TodoBean> todosList = [];
 
-  // DateTime? selectedDateTime;
-
   final TextEditingController taskNameController = TextEditingController();
   final TextEditingController todoNameController = TextEditingController();
 
@@ -89,7 +87,6 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
     bool allGranted = statuses.values.every((status) => status.isGranted);
 
     if (allGranted) {
-      debugPrint("All permissions granted");
       _onCustomPick(isUpdate: isUpdate);
       return;
     }
@@ -102,7 +99,6 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
             .shouldShowRequestRationale(permission);
 
         if (shouldShowRationale) {
-          debugPrint("Rationale required for $permission");
           if (context.mounted) {
             await permissionService.relationalDialog(context, () {
               checkAndRequestPermissions(
@@ -113,11 +109,10 @@ class _AddEditScreenState extends ConsumerState<AddEditScreen> {
             });
           }
         } else {
-          debugPrint("Permission $permission permanently denied");
           await permissionService.openAppSetting();
         }
 
-        return; // Exit early if any permission needs action
+        return;
       }
 
       if (status == PermissionStatus.permanentlyDenied) {

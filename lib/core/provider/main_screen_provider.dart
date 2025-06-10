@@ -1,6 +1,5 @@
 import 'package:DoneIt/core/Repository/database_repo_impl.dart';
 import 'package:DoneIt/domain/task_bean.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/response_status.dart';
@@ -106,7 +105,6 @@ class MainScreenNotifier extends StateNotifier<MainScreenProvider> {
   }
 
   void deleteTask({required List<TaskBean> taskBean}) async {
-    debugPrint("function called");
     state = state.copyWith(respDeleteTask: ResponseStatus.onLoading());
     List<String> deletedIds = taskBean.map((task) => task.id).toList();
     var response = await DatabaseRepository.deleteMultipleTasksByIds(
